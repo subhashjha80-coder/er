@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Preview - ExamReady</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --red:#e8211a; --black:#0d0d0d; --gray:#f4f4f4; --gray2:#e8e8e8; --text:#1a1a1a; --muted:#666; --radius:18px; }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html, body { overflow-x:hidden; width:100%; }
+  body { font-family:'Nunito',sans-serif; background:#fff; color:var(--text); min-height:100vh; display:flex; flex-direction:column; }
+  header { background:var(--black); padding:0 24px; position:sticky; top:0; z-index:1000; display:flex; align-items:center; justify-content:space-between; height:64px; box-shadow:0 2px 16px rgba(0,0,0,0.3); }
+  .logo-wrap { display:flex; align-items:center; text-decoration:none; }
+  nav { display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  nav a { color:#ccc; font-weight:700; font-size:14px; padding:8px 14px; border-radius:8px; text-decoration:none; transition:.2s; }
+  nav a:hover, nav a.active { color:#fff; background:rgba(255,255,255,0.1); }
+  .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:8px; }
+  .hamburger span { width:24px; height:2px; background:#fff; border-radius:2px; }
+  .hero { background:linear-gradient(135deg,#0d0d0d 0%,#1a1a1a 55%,#2a0a0a 100%); padding:42px 24px; position:relative; overflow:hidden; }
+  .hero::before { content:''; position:absolute; inset:0; background:radial-gradient(circle at 75% 40%, rgba(232,33,26,0.15), transparent 45%); }
+  .hero-inner { max-width:1200px; margin:0 auto; position:relative; z-index:1; }
+  .breadcrumb { color:rgba(255,255,255,0.45); font-size:13px; font-weight:700; margin-bottom:14px; }
+  .breadcrumb a { color:rgba(255,255,255,0.45); text-decoration:none; }
+  .hero-badge { display:inline-block; background:var(--red); color:#fff; font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:5px 14px; border-radius:20px; margin-bottom:18px; }
+  .hero h1 { font-family:'Bebas Neue'; font-size:clamp(40px,7vw,78px); color:#fff; letter-spacing:2px; line-height:1; margin-bottom:12px; }
+  .hero h1 span { color:var(--red); }
+  .hero p { color:#bbb; font-size:16px; font-weight:600; max-width:760px; line-height:1.7; }
+  main { flex:1; max-width:1200px; width:100%; margin:0 auto; padding:34px 24px 52px; }
+  .viewer-shell { display:grid; gap:20px; }
+  .viewer-top { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+  .viewer-title { font-size:24px; font-weight:900; }
+  .viewer-actions { display:flex; gap:10px; flex-wrap:wrap; }
+  .btn, .btn-outline { display:inline-flex; align-items:center; justify-content:center; text-decoration:none; border-radius:12px; padding:12px 18px; font-size:14px; font-weight:800; }
+  .btn { background:var(--red); color:#fff; border:none; }
+  .btn-outline { background:#fff; color:var(--text); border:2px solid var(--gray2); }
+  .viewer-frame-wrap { background:#fff; border:1px solid var(--gray2); border-radius:22px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,0.08); }
+  .viewer-frame { width:100%; height:min(78vh,900px); border:none; background:#f7f7f7; }
+  .preview-note { margin-top:14px; font-size:13px; color:var(--muted); font-weight:700; }
+  .fallback { background:#fff8f8; border:1px solid #ffd8d8; color:#8f1d18; border-radius:18px; padding:24px; }
+  footer { background:var(--black); color:#aaa; padding:40px 24px 24px; margin-top:auto; }
+  .footer-inner { max-width:1200px; margin:0 auto; }
+  .footer-top { display:flex; gap:40px; flex-wrap:wrap; margin-bottom:32px; }
+  .footer-brand { flex:1; min-width:220px; }
+  .footer-brand p { font-size:13px; line-height:1.7; color:#888; }
+  .footer-links { flex:2; display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:24px; }
+  .footer-col h4 { color:#fff; font-size:14px; font-weight:800; margin-bottom:12px; text-transform:uppercase; letter-spacing:1px; }
+  .footer-col a { display:block; color:#888; text-decoration:none; font-size:13px; font-weight:600; margin-bottom:8px; }
+  .footer-col a:hover { color:#fff; }
+  .footer-bottom { border-top:1px solid #222; padding-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+  .footer-bottom p { font-size:12px; color:#555; }
+  .footer-bottom span { color:var(--red); }
+  @media(max-width:768px) {
+    nav { display:none; }
+    .hamburger { display:flex; }
+    .hero { padding:36px 16px; }
+    main { padding:24px 16px 40px; }
+    .viewer-frame { height:72vh; }
+  }
+</style>
+<link rel="stylesheet" href="animations.css">
+</head>
+<body>
+<header>
+  <a class="logo-wrap" href="index.html"><img src="logo.png" alt="ExamReady" style="height:44px;"></a>
+  <nav id="mainNav">
+    <a href="index.html">Home</a>
+    <a href="class9.html">Class 9</a>
+    <a href="class10.html">Class 10</a>
+    <a href="class11.html">Class 11</a>
+    <a href="class12.html">Class 12</a>
+    <a href="solutions.html">Solutions</a>
+    <a href="pyq.html">PYQs</a>
+    <a href="quizzes.html">Quizzes</a>
+  </nav>
+  <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="breadcrumb"><a href="index.html">Home</a> / PDF Preview</div>
+    <div class="hero-badge">Study Preview</div>
+    <h1>PDF <span>PREVIEW</span></h1>
+    <p id="heroText">Open your study file in a focused preview mode before downloading it.</p>
+  </div>
+</section>
+
+<main>
+  <div id="viewerMount"></div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div style="font-family:'Bebas Neue';font-size:28px;color:#fff;letter-spacing:2px;margin-bottom:12px">EX<span style="color:var(--red)">A</span>M READY</div>
+        <p>Free study resources for CBSE students in Class 9 to 12. PYQs, question banks, quizzes, and solutions - all free.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="solutions.html">CBSE Solutions</a>
+          <a href="pyq.html">PYQ Papers</a>
+          <a href="questionbank.html">Question Banks</a>
+          <a href="quizzes.html">Quizzes</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 ExamReady. Made with <span>&hearts;</span> for students.</p>
+      <p>CBSE Resources for Class 9–12</p>
+    </div>
+  </div>
+</footer>
+
+<script src="shared.js"></script>
+<script src="animations.js"></script>
+<script>
+function getQueryParam(key) {
+  return new URLSearchParams(window.location.search).get(key) || '';
+}
+
+function renderViewer() {
+  const rawUrl = getQueryParam('url');
+  const title = decodeURIComponent(getQueryParam('title') || 'PDF Preview');
+  const resolvedUrl = getResolvedFileUrl(rawUrl);
+  const embedUrl = getPreviewEmbedUrl(rawUrl);
+
+  document.title = `${title} - ExamReady`;
+  document.getElementById('heroText').textContent = `Preview "${title}" in a focused reading layout, then download it when you are ready.`;
+
+  if (!rawUrl || !resolvedUrl || resolvedUrl === '#') {
+    document.getElementById('viewerMount').innerHTML = `
+      <div class="fallback">
+        <h2 style="margin-bottom:10px">Preview unavailable</h2>
+        <p style="font-weight:700;line-height:1.7">This file could not be loaded for preview. The link may be missing or the file may no longer be available.</p>
+        <div class="viewer-actions" style="margin-top:18px">
+          <a class="btn-outline" href="javascript:history.back()">Go Back</a>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  document.getElementById('viewerMount').innerHTML = `
+    <div class="viewer-shell">
+      <div class="viewer-top">
+        <div class="viewer-title">${title}</div>
+        <div class="viewer-actions">
+          <a class="btn-outline" href="javascript:history.back()">Back</a>
+          <a class="btn-outline" href="${resolvedUrl}" target="_blank" rel="noopener noreferrer">Open Original</a>
+          <a class="btn" href="${resolvedUrl}" target="_blank" rel="noopener noreferrer" download>Download PDF</a>
+        </div>
+      </div>
+      <div class="viewer-frame-wrap">
+        <iframe class="viewer-frame" src="${embedUrl}" title="${title}"></iframe>
+      </div>
+      <div class="preview-note">If the preview does not load because of the file host, use "Open Original" or "Download PDF".</div>
+    </div>
+  `;
+}
+
+function toggleMenu() {
+  const nav = document.getElementById('mainNav');
+  // Use dataset flag instead of style check — avoids CSS vs inline style conflicts
+  if (nav.dataset.open === '1') {
+    nav.removeAttribute('style');
+    nav.dataset.open = '0';
+  } else {
+    nav.style.display = 'flex';
+    nav.style.flexDirection = 'column';
+    nav.style.position = 'absolute';
+    nav.style.top = '64px';
+    nav.style.left = '0';
+    nav.style.right = '0';
+    nav.style.background = '#111';
+    nav.style.padding = '16px';
+    nav.style.zIndex = '999';
+    nav.dataset.open = '1';
+  }
+}
+
+renderViewer();
+</script>
+</body>
+</html>

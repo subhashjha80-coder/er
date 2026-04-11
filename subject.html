@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subject Hub - ExamReady</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red:#e8211a;
+    --black:#0d0d0d;
+    --gray:#f4f4f4;
+    --gray2:#e8e8e8;
+    --text:#1a1a1a;
+    --muted:#666;
+    --radius:18px;
+    --shadow:0 16px 40px rgba(0,0,0,0.08);
+  }
+  *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+  html, body { overflow-x:hidden; width:100%; }
+  body { min-height:100vh; display:flex; flex-direction:column; font-family:'Nunito',sans-serif; background:#fff; color:var(--text); }
+  header { background:var(--black); padding:0 24px; position:sticky; top:0; z-index:1000; display:flex; align-items:center; justify-content:space-between; height:64px; box-shadow:0 2px 16px rgba(0,0,0,0.3); }
+  .logo-wrap { display:flex; align-items:center; gap:10px; text-decoration:none; }
+  nav { display:flex; align-items:center; gap:4px; flex-wrap:wrap; }
+  nav a { color:#ccc; font-weight:700; font-size:14px; padding:8px 14px; border-radius:8px; text-decoration:none; transition:.2s; }
+  nav a:hover, nav a.active { color:#fff; background:rgba(255,255,255,0.1); }
+  .hamburger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:8px; }
+  .hamburger span { width:24px; height:2px; background:#fff; border-radius:2px; }
+
+  .hero {
+    background:
+      radial-gradient(circle at top right, rgba(232,33,26,0.2), transparent 35%),
+      linear-gradient(135deg, #0d0d0d 0%, #171717 48%, #2f0f0f 100%);
+    padding:44px 24px 38px;
+    color:#fff;
+  }
+  .hero-inner { max-width:1200px; margin:0 auto; }
+  .breadcrumb { color:rgba(255,255,255,0.5); font-size:13px; font-weight:700; margin-bottom:14px; }
+  .breadcrumb a { color:inherit; text-decoration:none; }
+  .back-btn {
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12);
+    color:#fff; text-decoration:none; padding:10px 14px; border-radius:999px; font-size:13px; font-weight:800; margin-bottom:18px;
+  }
+  .hero-chip {
+    display:inline-flex; align-items:center; gap:8px;
+    background:rgba(255,255,255,0.09); border:1px solid rgba(255,255,255,0.12);
+    border-radius:999px; padding:8px 14px; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1px;
+  }
+  .hero-main { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(290px,.9fr); gap:24px; align-items:end; margin-top:18px; }
+  .hero h1 { font-family:'Bebas Neue',sans-serif; font-size:clamp(44px,8vw,92px); line-height:.94; letter-spacing:2px; margin-bottom:14px; }
+  .hero h1 span { color:var(--red); }
+  .hero p { color:#bbb; font-size:17px; line-height:1.7; max-width:720px; font-weight:700; }
+  .hero-side { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:24px; padding:22px; }
+  .hero-stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+  .mini-stat { background:#fff; border-radius:18px; padding:18px; color:var(--text); }
+  .mini-stat strong { display:block; font-family:'Bebas Neue',sans-serif; font-size:38px; line-height:1; color:var(--red); }
+  .mini-stat span { display:block; margin-top:8px; font-size:11px; font-weight:900; color:var(--muted); text-transform:uppercase; letter-spacing:1px; }
+
+  main { flex:1; width:100%; max-width:1200px; margin:0 auto; padding:36px 24px 60px; display:grid; grid-template-columns:minmax(0,1.45fr) minmax(280px,.85fr); gap:24px; }
+  .content-stack, .side-stack { display:flex; flex-direction:column; gap:20px; }
+  .card { background:#fff; border:1px solid var(--gray2); border-radius:24px; box-shadow:var(--shadow); }
+  .card-pad { padding:24px; }
+  .section-kicker { font-size:12px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:var(--muted); margin-bottom:12px; }
+  .overview-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+  .overview-tile { background:#fafafa; border:1px solid var(--gray2); border-radius:18px; padding:18px; }
+  .overview-tile strong { display:block; font-size:26px; font-weight:900; }
+  .overview-tile span { display:block; margin-top:6px; font-size:12px; color:var(--muted); font-weight:800; text-transform:uppercase; letter-spacing:1px; }
+
+  .ad-slot {
+    border:1px dashed #d7d7d7;
+    border-radius:20px;
+    background:linear-gradient(135deg,#fafafa,#f2f2f2);
+    padding:18px 20px;
+  }
+  .ad-slot strong { display:block; font-size:11px; font-weight:900; text-transform:uppercase; letter-spacing:1px; color:var(--red); margin-bottom:6px; }
+  .ad-slot h3 { font-size:19px; margin-bottom:4px; }
+  .ad-slot p { font-size:13px; color:var(--muted); line-height:1.7; }
+
+  .tabs { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; overflow-x:auto; padding-bottom:4px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab-btn {
+    border:1px solid var(--gray2); background:#fff; color:var(--text);
+    border-radius:999px; padding:10px 16px; font-size:12px; font-weight:900; cursor:pointer; transition:.2s;
+  }
+  .tab-btn.active, .tab-btn:hover { background:var(--red); color:#fff; border-color:var(--red); }
+  .resource-panel { display:none; }
+  .resource-panel.active { display:block; }
+  .resource-list { display:flex; flex-direction:column; gap:12px; }
+  .resource-item {
+    background:#fff; border:1px solid var(--gray2); border-radius:18px; padding:18px;
+    display:flex; align-items:center; justify-content:space-between; gap:16px; transition:.2s;
+  }
+  .resource-item:hover { border-color:#f0b2ad; box-shadow:0 12px 26px rgba(232,33,26,0.08); }
+  .resource-main { display:flex; align-items:flex-start; gap:14px; min-width:0; }
+  .resource-icon {
+    width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+    background:#fff0f0; color:var(--red); font-size:20px; font-weight:900; flex-shrink:0;
+  }
+  .resource-title { font-size:16px; font-weight:900; line-height:1.35; }
+  .resource-meta { font-size:12px; color:var(--muted); font-weight:700; line-height:1.6; margin-top:5px; }
+  .resource-link {
+    display:inline-flex; align-items:center; justify-content:center;
+    background:var(--red); color:#fff; text-decoration:none; border-radius:12px;
+    padding:11px 15px; font-size:13px; font-weight:900; flex-shrink:0;
+  }
+  .resource-link:hover { background:#c41a14; }
+  .empty-state { background:#f7f7f7; border:1px dashed var(--gray2); border-radius:18px; padding:34px 22px; text-align:center; color:var(--muted); }
+  .empty-state strong { display:block; color:var(--text); font-size:18px; margin-bottom:8px; }
+
+  .info-list { display:flex; flex-direction:column; gap:12px; }
+  .info-row { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; }
+  .info-row span:first-child { color:var(--muted); font-weight:800; }
+  .info-row span:last-child { font-weight:900; text-align:right; }
+  .related-grid { display:grid; gap:12px; }
+  .related-card {
+    border:1px solid var(--gray2); border-radius:18px; padding:16px;
+    text-decoration:none; color:inherit; background:#fff; transition:.2s;
+  }
+  .related-card:hover { border-color:#f0b2ad; background:#fff9f9; }
+  .related-card strong { display:block; font-size:15px; line-height:1.35; }
+  .related-card span { display:block; margin-top:6px; font-size:12px; font-weight:800; color:var(--muted); }
+
+  footer { background:var(--black); color:#aaa; padding:40px 24px 24px; margin-top:auto; }
+  .footer-inner { max-width:1200px; margin:0 auto; }
+  .footer-top { display:flex; gap:40px; flex-wrap:wrap; margin-bottom:32px; }
+  .footer-brand { flex:1; min-width:220px; }
+  .footer-brand p { font-size:13px; line-height:1.7; color:#888; }
+  .footer-links { flex:2; display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:24px; }
+  .footer-col h4 { color:#fff; font-size:14px; font-weight:800; margin-bottom:12px; text-transform:uppercase; letter-spacing:1px; }
+  .footer-col a { display:block; color:#888; text-decoration:none; font-size:13px; font-weight:600; margin-bottom:8px; }
+  .footer-col a:hover { color:#fff; }
+  .footer-bottom { border-top:1px solid #222; padding-top:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+  .footer-bottom p { font-size:12px; color:#555; }
+  .footer-bottom span { color:var(--red); }
+
+  /* ── Chapters view ── */
+  .chapter-block { background:#fff; border:1px solid var(--gray2); border-radius:20px; overflow:hidden; margin-bottom:16px; }
+  .chapter-header {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:16px 22px; background:linear-gradient(135deg,#fafafa,#f4f4f6);
+    border-bottom:1px solid var(--gray2); cursor:pointer; user-select:none;
+  }
+  .chapter-header:hover { background:linear-gradient(135deg,#fff0f0,#fde8e6); }
+  .chapter-header.open { background:linear-gradient(135deg,#fff0f0,#fde8e6); border-bottom-color:#f0b2ad; }
+  .chapter-num { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--red); line-height:1; flex-shrink:0; }
+  .chapter-info strong { display:block; font-size:15px; font-weight:900; }
+  .chapter-info span { display:block; font-size:12px; color:var(--muted); font-weight:700; margin-top:2px; }
+  .chapter-toggle { font-size:18px; color:var(--muted); transition:.25s; flex-shrink:0; }
+  .chapter-header.open .chapter-toggle { transform:rotate(180deg); color:var(--red); }
+  /* NEW: open chapter page button */
+  .chapter-page-btn {
+    display:inline-flex; align-items:center; gap:6px;
+    background:#fff0f0; color:var(--red); border:1px solid #fbc8c6;
+    border-radius:10px; padding:7px 12px;
+    font-size:12px; font-weight:900; text-decoration:none;
+    flex-shrink:0; transition:.2s;
+    white-space:nowrap;
+  }
+  .chapter-page-btn:hover { background:var(--red); color:#fff; border-color:var(--red); transform:translateY(-1px); box-shadow:0 4px 14px rgba(232,33,26,0.25); }
+  .chapter-body { display:none; padding:18px 22px; }
+  .chapter-body.open { display:block; }
+  .chapter-sub-label { font-size:10px; font-weight:900; text-transform:uppercase; letter-spacing:1.5px; color:var(--muted); margin:14px 0 8px; }
+  .chapter-sub-label:first-child { margin-top:0; }
+  .chapter-empty { text-align:center; padding:24px; color:var(--muted); background:var(--gray); border-radius:14px; font-size:13px; font-weight:700; }
+
+  /* ── Chapter grid (card-based overview) ── */
+  .chapter-cards-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px,1fr)); gap:14px; }
+  .chapter-card-link {
+    display:flex; flex-direction:column; gap:10px;
+    background:#fff; border:1.5px solid var(--gray2); border-radius:18px;
+    padding:18px 18px 14px; text-decoration:none; color:inherit;
+    transition:.25s; position:relative; overflow:hidden;
+  }
+  .chapter-card-link::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--red); border-radius:3px 3px 0 0; transform:scaleX(0); transform-origin:left; transition:.25s; }
+  .chapter-card-link:hover { border-color:var(--red); box-shadow:0 8px 28px rgba(232,33,26,0.12); transform:translateY(-3px); }
+  .chapter-card-link:hover::before { transform:scaleX(1); }
+  .ch-card-num { font-family:'Bebas Neue'; font-size:13px; letter-spacing:2px; color:var(--red); }
+  .ch-card-name { font-size:14px; font-weight:900; line-height:1.35; }
+  .ch-card-desc { font-size:12px; color:var(--muted); font-weight:600; line-height:1.5; }
+  .ch-card-footer { display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:8px; border-top:1px solid var(--gray2); }
+  .ch-card-count { font-size:11px; font-weight:800; color:var(--muted); }
+  .ch-card-cta { font-size:11px; font-weight:900; color:var(--red); }
+
+  @media (max-width: 1024px) {
+    .hero-main { grid-template-columns:1fr; }
+    .hero-side { display:none; }
+    main { grid-template-columns:1fr; }
+  }
+  @media (max-width: 920px) {
+    .overview-grid { grid-template-columns:repeat(3,1fr); }
+  }
+  @media (max-width: 768px) {
+    nav { display:none; }
+    .hamburger { display:flex; }
+    .hero { padding:36px 16px 30px; }
+    main { padding:24px 16px 46px; gap:16px; }
+    .resource-item { flex-direction:column; align-items:flex-start; gap:12px; }
+    .resource-link { width:100%; text-align:center; }
+    .overview-grid { grid-template-columns:repeat(3,1fr); gap:10px; }
+    .tabs { gap:6px; }
+    .tab-btn { padding:8px 12px; font-size:11px; }
+    .chapter-page-btn { display:none; }
+  }
+  @media (max-width: 480px) {
+    .overview-grid { grid-template-columns:1fr 1fr; }
+    .hero-stats { grid-template-columns:1fr 1fr; }
+  }
+</style>
+<link rel="stylesheet" href="animations.css">
+</head>
+<body>
+<header>
+  <a class="logo-wrap" href="index.html">
+    <img src="logo.png" alt="ExamReady" style="height:44px;">
+  </a>
+  <nav id="mainNav">
+    <a href="index.html">Home</a>
+    <a href="class9.html">Class 9</a>
+    <a href="class10.html">Class 10</a>
+    <a href="class11.html">Class 11</a>
+    <a href="class12.html">Class 12</a>
+    <a href="solutions.html">Solutions</a>
+    <a href="pyq.html">PYQs</a>
+    <a href="quizzes.html">Quizzes</a>
+  </nav>
+  <div class="hamburger" onclick="toggleMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner" id="heroMount"></div>
+</section>
+
+<main id="subjectMount"></main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div style="font-family:'Bebas Neue';font-size:28px;color:#fff;letter-spacing:2px;margin-bottom:12px">EX<span style="color:var(--red)">A</span>M READY</div>
+        <p>Subject-wise CBSE hubs with PYQs, question banks, solutions, quizzes, and focused revision material.</p>
+      </div>
+      <div class="footer-links">
+        <div class="footer-col">
+          <h4>Classes</h4>
+          <a href="class9.html">Class 9</a>
+          <a href="class10.html">Class 10</a>
+          <a href="class11.html">Class 11</a>
+          <a href="class12.html">Class 12</a>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <a href="solutions.html">Solutions</a>
+          <a href="pyq.html">PYQ Papers</a>
+          <a href="questionbank.html">Question Banks</a>
+          <a href="quizzes.html">Quizzes</a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 ExamReady. Made with <span>&hearts;</span> for students.</p>
+      <p>Dedicated subject hubs for faster study flow.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="shared.js"></script>
+<script src="animations.js"></script>
+<script>
+const RESOURCE_TYPES = [
+  { key:'pyq', label:'PYQ Papers', icon:'PYQ', empty:'No PYQ papers added yet.' },
+  { key:'qb', label:'Question Banks', icon:'QB', empty:'No question banks added yet.' },
+  { key:'spq', label:'SPQ', icon:'SPQ', empty:'No SPQ papers added yet.' },
+  { key:'ip', label:'Institutional Papers', icon:'INS', empty:'No institutional papers added yet.' },
+  { key:'notes', label:'Short Notes', icon:'NOTE', empty:'No short notes added yet.' },
+  { key:'sol', label:'Solutions', icon:'SOL', empty:'No solution articles added yet.' },
+  { key:'quiz', label:'Quizzes', icon:'QUIZ', empty:'No quizzes added yet.' }
+];
+
+// ── Chapter URL helper ────────────────────────────────────
+function buildChapterUrl(cls, subjectKey, chapterId) {
+  return `chapter.html?class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(subjectKey)}&chapter=${encodeURIComponent(chapterId)}`;
+}
+
+// ── Chapter view helpers ──────────────────────────────────
+function countChapterResources(cls, subjectKey, chapterId, allPdfs, solutionPosts, quizzes) {
+  const PDF_TYPES = ['pyq','qb','spq','ip','notes'];
+  let count = 0;
+  PDF_TYPES.forEach(t => {
+    count += (allPdfs[`${cls}-${subjectKey}-${t}`] || []).filter(p => (p.chapterId || '') === chapterId).length;
+  });
+  count += solutionPosts.filter(p => (p.chapterId || '') === chapterId).length;
+  count += quizzes.filter(q => (q.chapterId || '') === chapterId).length;
+  return count;
+}
+
+function buildChapterView(cls, subjectKey) {
+  const chapters = getChapters(cls, subjectKey);
+  const allPdfs = getData('pdfs') || {};
+  const solutionPosts = getSolutionPostsByClassAndSubject(cls, subjectKey);
+  const quizzes = (getData('quizzes') || {})[`${cls}-${subjectKey}`] || [];
+  const PDF_TYPES = ['pyq','qb','spq','ip','notes'];
+  const PDF_LABELS = { pyq:'PYQ Papers', qb:'Question Banks', spq:'SPQ Papers', ip:'Institutional Papers', notes:'Short Notes' };
+
+  function pdfItems(chId) {
+    const items = [];
+    PDF_TYPES.forEach(t => {
+      (allPdfs[`${cls}-${subjectKey}-${t}`] || [])
+        .filter(p => (p.chapterId || '') === chId)
+        .forEach(p => items.push({ ...p, _type: t }));
+    });
+    return items;
+  }
+
+  function solItems(chId) {
+    return solutionPosts.filter(p => (p.chapterId || '') === chId);
+  }
+
+  function quizItems(chId) {
+    return quizzes.filter(q => (q.chapterId || '') === chId);
+  }
+
+  function resourceCard(icon, title, meta, href, linkLabel) {
+    return `<div class="resource-item">
+      <div class="resource-main">
+        <div class="resource-icon">${escapeHtml(icon)}</div>
+        <div>
+          <div class="resource-title">${escapeHtml(title)}</div>
+          <div class="resource-meta">${escapeHtml(meta)}</div>
+        </div>
+      </div>
+      <a class="resource-link" href="${href}">${linkLabel}</a>
+    </div>`;
+  }
+
+  function buildBodyHtml(chId) {
+    const pdfs = pdfItems(chId);
+    const sols = solItems(chId);
+    const qzs = quizItems(chId);
+    if (!pdfs.length && !sols.length && !qzs.length) {
+      return '<div class="chapter-empty">No resources assigned to this chapter yet.</div>';
+    }
+    let html = '';
+    if (pdfs.length) {
+      html += '<div class="chapter-sub-label">Study Files</div><div class="resource-list">';
+      pdfs.forEach(p => {
+        html += resourceCard(PDF_LABELS[p._type]?.slice(0,3)||'DOC', p.name,
+          `${PDF_LABELS[p._type]||p._type}${p.year ? ' · ' + p.year : ''}${p.size ? ' · ' + p.size : ''}`,
+          buildPdfPreviewUrl(p), 'Preview PDF');
+      });
+      html += '</div>';
+    }
+    if (sols.length) {
+      html += '<div class="chapter-sub-label">Solution Articles</div><div class="resource-list">';
+      sols.forEach(s => {
+        html += resourceCard('SOL', s.title, getSolutionExcerpt(s, 90),
+          getSolutionPostUrl(s), 'Read Solution');
+      });
+      html += '</div>';
+    }
+    if (qzs.length) {
+      html += '<div class="chapter-sub-label">Quizzes</div><div class="resource-list">';
+      qzs.forEach(q => {
+        html += resourceCard('QUIZ', q.title, `${(q.questions||[]).length} questions`,
+          `quiz.html?id=${encodeURIComponent(q.id)}`, 'Open Quiz');
+      });
+      html += '</div>';
+    }
+    return html;
+  }
+
+  let html = '';
+
+  // ── If no chapters: show empty state + link to subject page ──
+  if (chapters.length === 0) {
+    return `<div class="empty-state"><strong>No chapters created yet</strong><p>The admin can create chapters from the Admin Panel → Chapters Manager. Once added, each chapter will appear here with a dedicated sub-page for its resources.</p></div>`;
+  }
+
+  // ── Chapter cards grid (quick overview) ──
+  html += `<div style="margin-bottom:20px;">
+    <div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+      <span style="width:3px;height:12px;background:var(--red);border-radius:2px;display:inline-block;flex-shrink:0;"></span>
+      Quick Access — Click a chapter to open its full page
+    </div>
+    <div class="chapter-cards-grid">`;
+
+  chapters.forEach(ch => {
+    const total = countChapterResources(cls, subjectKey, ch.id, allPdfs, solutionPosts, quizzes);
+    html += `<a class="chapter-card-link" href="${buildChapterUrl(cls, subjectKey, ch.id)}">
+      <div class="ch-card-num">Chapter ${ch.number}</div>
+      <div class="ch-card-name">${escapeHtml(ch.name)}</div>
+      ${ch.description ? `<div class="ch-card-desc">${escapeHtml(ch.description.slice(0, 80))}${ch.description.length > 80 ? '…' : ''}</div>` : ''}
+      <div class="ch-card-footer">
+        <span class="ch-card-count">${total} resource${total !== 1 ? 's' : ''}</span>
+        <span class="ch-card-cta">Open →</span>
+      </div>
+    </a>`;
+  });
+
+  html += `</div></div>`;
+
+  // ── Divider ──
+  html += `<div style="font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;">
+    <span style="width:3px;height:12px;background:var(--red);border-radius:2px;display:inline-block;flex-shrink:0;"></span>
+    Inline Preview — Expand to browse resources without leaving this page
+  </div>`;
+
+  // ── Inline expandable blocks ──
+  chapters.forEach((ch) => {
+    const bodyHtml = buildBodyHtml(ch.id);
+    const totalInChapter = pdfItems(ch.id).length + solItems(ch.id).length + quizItems(ch.id).length;
+    const blockId = `chapblock_${ch.id}`;
+    html += `<div class="chapter-block">
+      <div class="chapter-header" id="${blockId}_hdr" onclick="toggleChapterBlock('${blockId}')">
+        <div class="chapter-num">Ch ${ch.number}</div>
+        <div class="chapter-info" style="flex:1">
+          <strong>${escapeHtml(ch.name)}</strong>
+          <span>${escapeHtml(ch.description || '')}${totalInChapter ? ` · ${totalInChapter} resource${totalInChapter!==1?'s':''}` : ' · No resources yet'}</span>
+        </div>
+        <a class="chapter-page-btn" href="${buildChapterUrl(cls, subjectKey, ch.id)}" onclick="event.stopPropagation()" title="Open dedicated chapter page">
+          Open Page ↗
+        </a>
+        <div class="chapter-toggle">▼</div>
+      </div>
+      <div class="chapter-body" id="${blockId}_body">${bodyHtml}</div>
+    </div>`;
+  });
+
+  // Uncategorized section
+  const allPdfsFlat = pdfItems('');
+  const uncatSols = solItems('');
+  const uncatQzs = quizItems('');
+  const uncatTotal = allPdfsFlat.length + uncatSols.length + uncatQzs.length;
+  if (uncatTotal > 0) {
+    const bodyHtml = buildBodyHtml('');
+    html += `<div class="chapter-block" style="border-style:dashed">
+      <div class="chapter-header" id="chapblock_uncat_hdr" onclick="toggleChapterBlock('chapblock_uncat')">
+        <div class="chapter-num" style="color:var(--muted)">—</div>
+        <div class="chapter-info" style="flex:1">
+          <strong>Uncategorized</strong>
+          <span>${uncatTotal} resource${uncatTotal!==1?'s':''} not assigned to a chapter</span>
+        </div>
+        <div class="chapter-toggle">▼</div>
+      </div>
+      <div class="chapter-body" id="chapblock_uncat_body">${bodyHtml}</div>
+    </div>`;
+  }
+
+  return html;
+}
+
+function toggleChapterBlock(blockId) {
+  const hdr = document.getElementById(blockId + '_hdr');
+  const body = document.getElementById(blockId + '_body');
+  if (!hdr || !body) return;
+  const open = hdr.classList.toggle('open');
+  body.classList.toggle('open', open);
+}
+
+
+function toggleMenu() {
+  const nav = document.getElementById('mainNav');
+  if (nav.dataset.open === '1') {
+    nav.removeAttribute('style');
+    nav.dataset.open = '0';
+  } else {
+    nav.style.display = 'flex';
+    nav.style.flexDirection = 'column';
+    nav.style.position = 'absolute';
+    nav.style.top = '64px';
+    nav.style.left = '0';
+    nav.style.right = '0';
+    nav.style.background = '#111';
+    nav.style.padding = '16px';
+    nav.style.zIndex = '999';
+    nav.dataset.open = '1';
+  }
+}
+
+function renderNotFound() {
+  document.getElementById('heroMount').innerHTML = `
+    <div class="breadcrumb"><a href="index.html">Home</a> / Subject Hub</div>
+    <a class="back-btn" href="index.html">Back To Home</a>
+    <div class="hero-chip">Invalid Subject</div>
+    <div class="hero-main">
+      <div>
+        <h1>SUBJECT <span>NOT FOUND</span></h1>
+        <p>This class or subject is missing. Return to the class page and choose a valid subject card.</p>
+      </div>
+    </div>
+  `;
+  document.getElementById('subjectMount').innerHTML = `
+    <div class="content-stack">
+      <div class="card card-pad">
+        <div class="empty-state">
+          <strong>No subject page available</strong>
+          <p>Go back and open another subject from a class page.</p>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function buildPdfList(items, type) {
+  if (!items.length) {
+    return `<div class="empty-state"><strong>Nothing here yet</strong><p>${escapeHtml(type.empty)}</p></div>`;
+  }
+  return `<div class="resource-list">${items.map(item => `
+    <div class="resource-item">
+      <div class="resource-main">
+        <div class="resource-icon">${escapeHtml(type.icon)}</div>
+        <div>
+          <div class="resource-title">${escapeHtml(item.name)}</div>
+          <div class="resource-meta">${escapeHtml(item.year ? `Year: ${item.year} - ` : '')}${escapeHtml(item.size || 'Ready to view')}</div>
+        </div>
+      </div>
+      <a class="resource-link" href="${buildPdfPreviewUrl(item)}">Preview PDF</a>
+    </div>
+  `).join('')}</div>`;
+}
+
+function buildSolutionList(items, type) {
+  if (!items.length) {
+    return `<div class="empty-state"><strong>Nothing here yet</strong><p>${escapeHtml(type.empty)}</p></div>`;
+  }
+  return `<div class="resource-list">${items.map(item => `
+    <div class="resource-item">
+      <div class="resource-main">
+        <div class="resource-icon">${escapeHtml(type.icon)}</div>
+        <div>
+          <div class="resource-title">${escapeHtml(item.title)}</div>
+          <div class="resource-meta">${escapeHtml(getSolutionExcerpt(item, 110))}</div>
+        </div>
+      </div>
+      <a class="resource-link" href="${getSolutionPostUrl(item)}">Read Solution</a>
+    </div>
+  `).join('')}</div>`;
+}
+
+function buildQuizList(items, type) {
+  if (!items.length) {
+    return `<div class="empty-state"><strong>Nothing here yet</strong><p>${escapeHtml(type.empty)}</p></div>`;
+  }
+  return `<div class="resource-list">${items.map(item => `
+    <div class="resource-item">
+      <div class="resource-main">
+        <div class="resource-icon">${escapeHtml(type.icon)}</div>
+        <div>
+          <div class="resource-title">${escapeHtml(item.title)}</div>
+          <div class="resource-meta">${escapeHtml(item.questions.length)} questions - ${escapeHtml(item.subject || '')}</div>
+        </div>
+      </div>
+      <a class="resource-link" href="quiz.html?id=${encodeURIComponent(item.id)}">Open Quiz</a>
+    </div>
+  `).join('')}</div>`;
+}
+
+function switchTab(key) {
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === key));
+  document.querySelectorAll('.resource-panel').forEach(panel => panel.classList.toggle('active', panel.dataset.panel === key));
+  if (key === 'chapters') {
+    const mount = document.getElementById('chapterViewMount');
+    if (mount && window._subjectCls && window._subjectKey) {
+      mount.innerHTML = buildChapterView(window._subjectCls, window._subjectKey);
+    }
+  }
+}
+
+function renderSubjectPage(cls, subjectKey) {
+  const classMeta = getClassMeta(cls);
+  const subject = getSubjectMeta(cls, subjectKey);
+  const pdfCounts = RESOURCE_TYPES.filter(type => !['sol', 'quiz'].includes(type.key))
+    .reduce((sum, type) => sum + getResourceItems(cls, subjectKey, type.key).length, 0);
+  const solutionPosts = getSolutionPostsByClassAndSubject(cls, subjectKey);
+  const quizzes = (getData('quizzes') || {})[`${cls}-${subjectKey}`] || [];
+  const totalResources = pdfCounts + solutionPosts.length + quizzes.length;
+  const sameClassSubjects = (getSubjectsMap()[cls] || []).filter(item => item.key !== subjectKey);
+  const chapters = getChapters(cls, subjectKey);
+
+  window._subjectCls = cls;
+  window._subjectKey = subjectKey;
+  document.title = `${classMeta.label} ${subject.label} - ExamReady`;
+  document.getElementById('heroMount').innerHTML = `
+    <div class="breadcrumb"><a href="index.html">Home</a> / <a href="class${escapeHtml(cls)}.html">${escapeHtml(classMeta.label)}</a> / ${escapeHtml(subject.label)}</div>
+    <a class="back-btn" href="class${escapeHtml(cls)}.html">Back To ${escapeHtml(classMeta.label)}</a>
+    <div class="hero-chip">${escapeHtml(subject.stream || 'Subject Hub')}</div>
+    <div class="hero-main">
+      <div>
+        <h1>${escapeHtml(subject.label)} <span>HUB</span></h1>
+        <p>Everything for ${escapeHtml(subject.label)} in ${escapeHtml(classMeta.label)} — PYQs, question banks, solutions, quizzes, and ${chapters.length} chapter${chapters.length !== 1 ? 's' : ''}, each with a dedicated sub-page.</p>
+      </div>
+      <div class="hero-side">
+        <div class="hero-stats">
+          <div class="mini-stat"><strong>${escapeHtml(String(totalResources))}</strong><span>Total Items</span></div>
+          <div class="mini-stat"><strong>${escapeHtml(String(solutionPosts.length))}</strong><span>Solutions</span></div>
+          <div class="mini-stat"><strong>${escapeHtml(String(quizzes.length))}</strong><span>Quizzes</span></div>
+          <div class="mini-stat"><strong>${escapeHtml(String(chapters.length))}</strong><span>Chapters</span></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const panels = RESOURCE_TYPES.map((type, index) => {
+    let html = '';
+    if (type.key === 'sol') html = buildSolutionList(solutionPosts, type);
+    else if (type.key === 'quiz') html = buildQuizList(quizzes, type);
+    else html = buildPdfList(getResourceItems(cls, subjectKey, type.key), type);
+
+    return `
+      <div class="resource-panel ${index === 0 ? 'active' : ''}" data-panel="${escapeHtml(type.key)}">
+        ${html}
+      </div>
+    `;
+  }).join('') + `
+      <div class="resource-panel" data-panel="chapters">
+        <div id="chapterViewMount"></div>
+      </div>
+  `;
+
+  document.getElementById('subjectMount').innerHTML = `
+    <div class="content-stack">
+      <div class="card card-pad">
+        <div class="section-kicker">Overview</div>
+        <div class="overview-grid">
+          <div class="overview-tile"><strong>${escapeHtml(classMeta.label)}</strong><span>Class</span></div>
+          <div class="overview-tile"><strong>${escapeHtml(subject.label)}</strong><span>Subject</span></div>
+          <div class="overview-tile"><strong>${escapeHtml(String(chapters.length))}</strong><span>Chapters</span></div>
+        </div>
+      </div>
+
+      ${getManagedAdSlotHtml('inline', {
+        meta: 'Subject Page Ad Spot',
+        title: 'Strong place for coaching, books, or test series offers.',
+        copy: 'This appears after the overview.',
+        tag: 'Subject focus',
+        compact: true
+      })}
+
+      <div class="card card-pad">
+        <div class="section-kicker">Resources</div>
+        <div class="tabs">
+          ${RESOURCE_TYPES.map((type, index) => `
+            <button class="tab-btn ${index === 0 ? 'active' : ''}" data-tab="${escapeHtml(type.key)}" onclick="switchTab('${escapeHtml(type.key)}')">${escapeHtml(type.label)}</button>
+          `).join('')}
+          <button class="tab-btn" data-tab="chapters" onclick="switchTab('chapters')" style="background:linear-gradient(135deg,#fff0f0,#fde8e6);border-color:#f0b2ad;color:var(--red)">📖 By Chapter${chapters.length ? ` (${chapters.length})` : ''}</button>
+        </div>
+        ${panels}
+      </div>
+    </div>
+
+    <aside class="side-stack">
+      <div class="card card-pad">
+        <div class="section-kicker">Subject Info</div>
+        <div class="info-list">
+          <div class="info-row"><span>Class</span><span>${escapeHtml(classMeta.label)}</span></div>
+          <div class="info-row"><span>Subject</span><span>${escapeHtml(subject.label)}</span></div>
+          <div class="info-row"><span>Stream</span><span>${escapeHtml(subject.stream || 'General')}</span></div>
+          <div class="info-row"><span>Chapters</span><span>${chapters.length}</span></div>
+          <div class="info-row"><span>Total Resources</span><span>${totalResources}</span></div>
+        </div>
+      </div>
+
+      ${chapters.length > 0 ? `
+      <div class="card card-pad">
+        <div class="section-kicker">Jump to Chapter</div>
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          ${chapters.map(ch => {
+            const chRes = countChapterResources(cls, subjectKey, ch.id, getData('pdfs')||{}, solutionPosts, quizzes);
+            return `<a href="${buildChapterUrl(cls, subjectKey, ch.id)}" style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--gray2);border-radius:12px;text-decoration:none;color:inherit;transition:.2s;" onmouseenter="this.style.borderColor='var(--red)';this.style.background='#fffbfb'" onmouseleave="this.style.borderColor='var(--gray2)';this.style.background='#fff'">
+              <span style="font-family:'Bebas Neue';font-size:15px;color:var(--red);letter-spacing:1px;flex-shrink:0">Ch ${ch.number}</span>
+              <div style="flex:1;min-width:0">
+                <div style="font-size:12.5px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(ch.name)}</div>
+                <div style="font-size:11px;color:var(--muted);font-weight:700">${chRes} resource${chRes!==1?'s':''}</div>
+              </div>
+              <span style="font-size:11px;color:var(--red);font-weight:900">→</span>
+            </a>`;
+          }).join('')}
+        </div>
+      </div>` : ''}
+
+      <div class="card card-pad">
+        <div class="section-kicker">More Subjects In ${escapeHtml(classMeta.label)}</div>
+        <div class="related-grid">
+          ${sameClassSubjects.slice(0, 8).map(item => `
+            <a class="related-card" href="${buildSubjectPageUrl(cls, item.key)}">
+              <strong>${escapeHtml(item.label)}</strong>
+              <span>${escapeHtml(item.stream || 'Subject')}</span>
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    </aside>
+  `;
+}
+
+const params = new URLSearchParams(window.location.search);
+const cls = params.get('class');
+const subjectKey = params.get('subject');
+if (!cls || !subjectKey || !getSubjectsMap()[cls]?.some(item => item.key === subjectKey)) renderNotFound();
+else renderSubjectPage(cls, subjectKey);
+</script>
+</body>
+</html>
