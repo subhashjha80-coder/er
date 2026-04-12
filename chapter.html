@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chapter – ExamReady</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="animations.css">
 <style>
 :root {
-  --red:#e8211a; --red-soft:rgba(232,33,26,0.07); --black:#0d0d0d;
-  --surface:#f4f4f6; --card:#ffffff; --border:#e4e4e7; --border-soft:#eeeeef;
+  --red:#e8211a; --red-soft:rgba(232,33,26,0.07);
+  --black:#0d0d0d; --surface:#f4f4f6;
+  --card:#ffffff; --border:#e4e4e7; --border-soft:#eeeeef;
   --text:#1a1a1a; --text-2:#4a4a4a; --muted:#888; --muted-light:#bbb;
   --radius:18px; --shadow:0 8px 32px rgba(0,0,0,0.07);
   --ease:.28s cubic-bezier(.4,0,.2,1);
@@ -31,102 +31,113 @@ nav a:hover,nav a.active{color:#fff;background:rgba(255,255,255,0.09);}
 .hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px;}
 .hamburger span{width:24px;height:2px;background:#fff;border-radius:2px;}
 
+/* ── Chapter nav bar ── */
+.ch-nav-bar{background:var(--card);border-bottom:1px solid var(--border);padding:0 28px;position:sticky;top:64px;z-index:900;box-shadow:0 2px 12px rgba(0,0,0,0.04);}
+.ch-nav-inner{max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;height:52px;}
+.ch-nav-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:10px;background:var(--surface);border:1px solid var(--border);font-size:12.5px;font-weight:800;color:var(--text-2);text-decoration:none;transition:background var(--ease),border-color var(--ease),color var(--ease);}
+.ch-nav-btn:hover{background:#fff0f0;border-color:var(--red);color:var(--red);}
+.ch-nav-btn.disabled{opacity:.35;pointer-events:none;}
+.ch-dots{display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none;padding:0 4px;}
+.ch-dots::-webkit-scrollbar{display:none;}
+.ch-dot{width:9px;height:9px;border-radius:50%;background:var(--border);flex-shrink:0;cursor:pointer;transition:background var(--ease),transform var(--ease);}
+.ch-dot.active{background:var(--red);transform:scale(1.35);}
+.ch-dot:hover{background:var(--red);opacity:.65;}
+
 /* ── Hero ── */
 .hero{
   background:
     radial-gradient(ellipse 65% 90% at 88% 18%,rgba(232,33,26,0.22) 0%,transparent 55%),
     radial-gradient(ellipse 40% 50% at 5% 85%,rgba(232,33,26,0.08) 0%,transparent 52%),
     linear-gradient(158deg,#080808 0%,#111111 40%,#1f0b0b 100%);
-  padding:50px 28px 44px;color:#fff;position:relative;overflow:hidden;
+  padding:50px 28px 42px;color:#fff;position:relative;overflow:hidden;
 }
 .hero::before{content:'';position:absolute;inset:0;pointer-events:none;
   background-image:linear-gradient(rgba(255,255,255,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.02) 1px,transparent 1px);
   background-size:52px 52px;mask-image:radial-gradient(ellipse 85% 85% at 50% 50%,#000 25%,transparent 72%);}
-.hero-inner{max-width:1300px;margin:0 auto;position:relative;z-index:1;}
-
+.hero-inner{max-width:1280px;margin:0 auto;position:relative;z-index:1;}
 .crumbs{display:flex;align-items:center;gap:5px;flex-wrap:wrap;color:rgba(255,255,255,0.35);font-size:12px;font-weight:700;margin-bottom:18px;}
 .crumbs a{color:inherit;text-decoration:none;transition:color var(--ease);}
 .crumbs a:hover{color:rgba(255,255,255,0.7);}
 .crumbs-sep{opacity:.3;}
-
-.back-btn{display:inline-flex;align-items:center;gap:8px;color:rgba(255,255,255,0.82);text-decoration:none;border:1px solid rgba(255,255,255,0.13);border-radius:999px;padding:9px 18px;font-size:13px;font-weight:800;background:rgba(255,255,255,0.05);margin-bottom:22px;transition:background var(--ease),border-color var(--ease),transform var(--ease);}
+.back-btn{display:inline-flex;align-items:center;gap:8px;color:rgba(255,255,255,0.82);text-decoration:none;border:1px solid rgba(255,255,255,0.13);border-radius:999px;padding:9px 18px;font-size:13px;font-weight:800;background:rgba(255,255,255,0.05);backdrop-filter:blur(8px);margin-bottom:20px;transition:background var(--ease),border-color var(--ease),transform var(--ease);}
 .back-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.28);transform:translateX(-3px);}
-
-.chapter-num-big{font-family:'Bebas Neue';font-size:clamp(12px,2vw,16px);letter-spacing:3px;color:rgba(232,33,26,0.7);margin-bottom:12px;text-transform:uppercase;}
-
-.hero h1{
-  font-family:'Space Grotesk',sans-serif;
-  font-size:clamp(28px,4.5vw,62px);
-  line-height:1.05;font-weight:800;max-width:960px;margin-bottom:16px;letter-spacing:-0.8px;
-  background:linear-gradient(165deg,#fff 35%,rgba(255,255,255,0.65));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
-.hero-desc{color:rgba(255,255,255,0.55);font-size:clamp(14px,1.6vw,16px);line-height:1.8;max-width:680px;font-weight:600;margin-bottom:28px;font-family:'Space Grotesk',sans-serif;}
-
-.hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px;}
+.chapter-num-label{font-family:'Bebas Neue';font-size:clamp(12px,2vw,15px);letter-spacing:3px;color:rgba(232,33,26,0.75);margin-bottom:10px;text-transform:uppercase;}
+.hero h1{font-family:'Space Grotesk',sans-serif;font-size:clamp(26px,4.5vw,58px);line-height:1.05;font-weight:800;max-width:960px;margin-bottom:14px;letter-spacing:-0.8px;background:linear-gradient(165deg,#fff 35%,rgba(255,255,255,0.65));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-desc{color:rgba(255,255,255,0.5);font-size:15px;line-height:1.8;max-width:680px;font-weight:600;margin-bottom:26px;font-family:'Space Grotesk',sans-serif;}
+.hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;}
 .hero-tag{border-radius:999px;padding:6px 14px;font-size:10.5px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.11);color:rgba(255,255,255,0.75);}
 .hero-tag.accent{background:rgba(232,33,26,0.2);border-color:rgba(232,33,26,0.35);color:#ffb3ae;}
-
 .hero-stats{display:flex;flex-wrap:wrap;gap:12px;padding-top:22px;border-top:1px solid rgba(255,255,255,0.08);}
 .hero-stat{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);border-radius:12px;padding:12px 18px;text-align:center;}
 .hero-stat strong{display:block;font-family:'Bebas Neue';font-size:28px;color:var(--red);line-height:1;}
 .hero-stat span{display:block;font-size:9px;font-weight:800;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
 
-/* ── Chapter navigation bar ── */
-.chapter-nav-bar{background:var(--card);border-bottom:1px solid var(--border);padding:0 28px;position:sticky;top:64px;z-index:900;box-shadow:0 2px 16px rgba(0,0,0,0.05);}
-.chapter-nav-inner{max-width:1300px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;height:54px;}
-.ch-nav-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;background:var(--surface);border:1px solid var(--border);font-size:12.5px;font-weight:800;color:var(--text-2);text-decoration:none;transition:background var(--ease),border-color var(--ease),color var(--ease);}
-.ch-nav-btn:hover{background:#fff0f0;border-color:var(--red);color:var(--red);}
-.ch-nav-btn.disabled{opacity:.35;pointer-events:none;}
-.ch-nav-center{display:flex;align-items:center;gap:10px;overflow-x:auto;scrollbar-width:none;padding:0 8px;}
-.ch-nav-center::-webkit-scrollbar{display:none;}
-.ch-dot{width:9px;height:9px;border-radius:50%;background:var(--border);flex-shrink:0;cursor:pointer;transition:background var(--ease),transform var(--ease);}
-.ch-dot.active{background:var(--red);transform:scale(1.35);}
-.ch-dot:hover{background:var(--red);opacity:.65;}
-
 /* ── Page layout ── */
-.page-body{max-width:1300px;margin:0 auto;padding:32px 28px 72px;display:grid;grid-template-columns:minmax(0,1fr) 296px;gap:24px;align-items:start;}
+.page-body{max-width:1280px;margin:0 auto;padding:28px 28px 72px;display:grid;grid-template-columns:minmax(0,1fr) 292px;gap:24px;align-items:start;}
+.main-content{display:flex;flex-direction:column;gap:20px;}
 
-/* ── Resource tabs ── */
-.res-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;}
+/* ── Resource card ── */
+.resources-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
+.resources-card-head{padding:20px 24px 0;background:linear-gradient(135deg,#fefefe,#f9f9fb);border-bottom:1px solid var(--border-soft);}
+.resources-card-kicker{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:7px;}
+.resources-card-kicker::before{content:'';width:3px;height:12px;background:var(--red);border-radius:2px;flex-shrink:0;}
+
+/* ── Tabs ── */
+.res-tabs{display:flex;gap:0;flex-wrap:wrap;overflow-x:auto;scrollbar-width:none;}
 .res-tabs::-webkit-scrollbar{display:none;}
-.res-tab{border:1px solid var(--border);background:var(--card);color:var(--text-2);border-radius:999px;padding:9px 18px;font-size:12px;font-weight:900;cursor:pointer;transition:background var(--ease),border-color var(--ease),color var(--ease),transform var(--ease);}
-.res-tab.active,.res-tab:hover{background:var(--red);color:#fff;border-color:var(--red);}
-.res-tab:hover{transform:translateY(-1px);}
-.res-tab-count{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:rgba(255,255,255,0.25);font-size:10px;margin-left:5px;}
+.res-tab{border:none;background:transparent;color:var(--muted);border-bottom:2px solid transparent;padding:10px 14px;font-size:12.5px;font-weight:800;cursor:pointer;font-family:'Nunito',sans-serif;transition:color var(--ease),border-color var(--ease);white-space:nowrap;display:flex;align-items:center;gap:6px;}
+.res-tab:hover{color:var(--text);}
+.res-tab.active{color:var(--red);border-bottom-color:var(--red);}
+.res-tab .tab-count{background:var(--red-soft);color:var(--red);font-size:10px;font-weight:900;padding:2px 7px;border-radius:20px;}
+.res-tab.active .tab-count{background:var(--red);color:#fff;}
+
+/* ── Panels ── */
+.res-panels{padding:22px 24px;}
 .res-panel{display:none;}
 .res-panel.active{display:flex;flex-direction:column;gap:12px;}
 
-/* ── Resource card ── */
-.res-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:border-color var(--ease),box-shadow var(--ease),transform var(--ease);}
-.res-card:hover{border-color:#f0b2ad;box-shadow:0 8px 28px rgba(232,33,26,0.09);transform:translateY(-2px);}
-.res-card-left{display:flex;align-items:flex-start;gap:14px;min-width:0;}
-.res-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex-shrink:0;letter-spacing:.5px;}
-.res-icon.pyq{background:#fff0f0;color:var(--red);}
-.res-icon.qb{background:#f0fff4;color:#2f9e44;}
-.res-icon.spq{background:#f3f0ff;color:#6741d9;}
-.res-icon.ip{background:#fff8f0;color:#e67700;}
-.res-icon.notes{background:#f0f4ff;color:#3b5bdb;}
-.res-icon.sol{background:#fff0f0;color:var(--red);}
-.res-icon.quiz{background:#fffbf0;color:#d4780a;}
-.res-title{font-size:15px;font-weight:900;line-height:1.35;margin-bottom:5px;}
-.res-meta{font-size:12px;color:var(--muted);font-weight:700;line-height:1.6;}
-.res-badge{display:inline-block;background:var(--red-soft);color:var(--red);font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;margin-bottom:4px;}
-.res-link{display:inline-flex;align-items:center;justify-content:center;background:var(--red);color:#fff;text-decoration:none;border-radius:12px;padding:10px 16px;font-size:13px;font-weight:900;flex-shrink:0;transition:background var(--ease),transform var(--ease),box-shadow var(--ease);}
-.res-link:hover{background:#c41a14;transform:translateY(-1px);box-shadow:0 6px 20px rgba(232,33,26,0.3);}
+/* ── Resource item ── */
+.res-item{background:#fff;border:1px solid var(--border);border-radius:16px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;transition:border-color var(--ease),box-shadow var(--ease),transform var(--ease);}
+.res-item:hover{border-color:#f0b2ad;box-shadow:0 6px 22px rgba(232,33,26,0.09);transform:translateY(-2px);}
+.res-item-left{display:flex;align-items:flex-start;gap:14px;min-width:0;flex:1;}
+.res-type-icon{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0;letter-spacing:.5px;}
+.res-type-icon.pyq{background:#fff0f0;color:var(--red);}
+.res-type-icon.qb{background:#f0fff4;color:#2f9e44;}
+.res-type-icon.spq{background:#f3f0ff;color:#6741d9;}
+.res-type-icon.ip{background:#fff8f0;color:#e67700;}
+.res-type-icon.notes{background:#f0f4ff;color:#3b5bdb;}
+.res-type-icon.sol{background:#fff0f0;color:var(--red);}
+.res-type-icon.quiz{background:#fffbf0;color:#c97a00;}
+.res-item-body{min-width:0;flex:1;}
+.res-item-badge{font-size:9.5px;font-weight:900;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:4px;}
+.res-item-title{font-size:15px;font-weight:900;line-height:1.35;color:var(--text);margin-bottom:4px;}
+.res-item-meta{font-size:12px;color:var(--muted);font-weight:700;line-height:1.55;}
+.res-action{display:inline-flex;align-items:center;justify-content:center;background:var(--red);color:#fff;text-decoration:none;border-radius:11px;padding:9px 16px;font-size:12.5px;font-weight:900;flex-shrink:0;transition:background var(--ease),transform var(--ease),box-shadow var(--ease);}
+.res-action:hover{background:#c41a14;transform:translateY(-1px);box-shadow:0 6px 18px rgba(232,33,26,0.3);}
+.res-action.quiz-btn{background:#c97a00;}
+.res-action.quiz-btn:hover{background:#a06200;}
+.res-action.sol-btn{background:var(--black);}
+.res-action.sol-btn:hover{background:#222;}
+
+/* ── Section label inside "All" panel ── */
+.res-section-label{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:var(--muted);display:flex;align-items:center;gap:8px;margin:6px 0 2px;}
+.res-section-label::before{content:'';width:3px;height:12px;background:var(--red);border-radius:2px;flex-shrink:0;}
+.res-section-label::after{content:'';flex:1;height:1px;background:var(--border);}
 
 /* ── Empty state ── */
-.empty-state{background:var(--surface);border:1.5px dashed var(--border);border-radius:var(--radius);padding:36px 24px;text-align:center;color:var(--muted);}
-.empty-icon{font-size:42px;margin-bottom:12px;}
-.empty-state strong{display:block;font-size:17px;color:var(--text);margin-bottom:8px;font-weight:900;}
-.empty-state p{font-size:13px;font-weight:600;line-height:1.7;}
+.empty-res{background:var(--surface);border:1.5px dashed var(--border);border-radius:var(--radius);padding:32px 20px;text-align:center;color:var(--muted);}
+.empty-res .e-icon{font-size:36px;margin-bottom:10px;}
+.empty-res strong{display:block;font-size:15px;color:var(--text);margin-bottom:6px;font-weight:900;}
+.empty-res p{font-size:13px;font-weight:600;line-height:1.7;}
 
-/* ── Section title ── */
-.sec-title{font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
-.sec-title::before{content:'';width:3px;height:13px;background:var(--red);border-radius:2px;flex-shrink:0;}
-.content-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;}
-.content-card-head{padding:18px 22px;border-bottom:1px solid var(--border-soft);background:linear-gradient(135deg,#fefefe,#f9f9fb);}
-.content-card-body{padding:20px 22px;}
+/* ── Prev/Next cards ── */
+.chapter-nav-cards{display:flex;gap:14px;flex-wrap:wrap;}
+.ch-nav-card{flex:1;min-width:180px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px 18px;text-decoration:none;color:inherit;transition:border-color var(--ease),box-shadow var(--ease),transform var(--ease);}
+.ch-nav-card:hover{border-color:var(--red);box-shadow:0 6px 22px rgba(232,33,26,0.1);transform:translateY(-2px);}
+.ch-nav-card-label{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
+.ch-nav-card-title{font-size:14px;font-weight:900;color:var(--text);line-height:1.35;}
+.ch-nav-card.disabled{background:var(--surface);border-style:dashed;pointer-events:none;}
+.ch-nav-card.disabled .ch-nav-card-title{color:var(--muted);font-size:13px;font-weight:700;}
 
 /* ── Sidebar ── */
 .sidebar{display:flex;flex-direction:column;gap:18px;position:sticky;top:128px;}
@@ -134,31 +145,22 @@ nav a:hover,nav a.active{color:#fff;background:rgba(255,255,255,0.09);}
 .sidebar-card-head{padding:14px 17px;border-bottom:1px solid var(--border-soft);background:linear-gradient(135deg,#fafafa,#f4f4f6);}
 .sidebar-heading{font-size:12px;font-weight:900;color:var(--text);display:flex;align-items:center;gap:7px;}
 .sidebar-heading::before{content:'';width:3px;height:13px;background:var(--red);border-radius:2px;flex-shrink:0;}
-.sidebar-body{padding:14px 16px;}
-
-/* Chapter list in sidebar */
-.chapter-list-sidebar{display:flex;flex-direction:column;gap:2px;}
-.ch-list-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;text-decoration:none;color:inherit;transition:background var(--ease),padding-left var(--ease);position:relative;}
-.ch-list-item:hover{background:#fffbfb;padding-left:16px;}
-.ch-list-item.active{background:var(--red-soft);color:var(--red);}
-.ch-list-item.active .ch-num-badge{background:var(--red);color:#fff;}
-.ch-num-badge{font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:2px 8px;flex-shrink:0;transition:background var(--ease),color var(--ease);}
-.ch-list-name{font-size:12.5px;font-weight:800;line-height:1.35;}
-.ch-list-count{font-size:10px;color:var(--muted);font-weight:700;margin-top:1px;}
-
-/* Subject info sidebar */
+.sidebar-body{padding:12px 14px;}
 .info-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border-soft);font-size:12.5px;}
 .info-row:last-child{border-bottom:none;}
 .info-row span:first-child{color:var(--muted);font-weight:700;}
 .info-row span:last-child{font-weight:900;}
-
-/* All chapters card */
-.all-ch-btn{display:block;text-align:center;padding:10px;background:var(--surface);border-radius:10px;font-size:12px;font-weight:800;color:var(--text-2);text-decoration:none;margin-top:10px;transition:background var(--ease),color var(--ease);}
-.all-ch-btn:hover{background:var(--red-soft);color:var(--red);}
+.ch-sidebar-list{display:flex;flex-direction:column;gap:2px;}
+.ch-sidebar-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;text-decoration:none;color:inherit;transition:background var(--ease),padding-left var(--ease);}
+.ch-sidebar-item:hover{background:#fffbfb;padding-left:14px;}
+.ch-sidebar-item.active-ch{background:var(--red-soft);color:var(--red);}
+.ch-sidebar-num{font-family:'Bebas Neue';font-size:14px;letter-spacing:1px;color:var(--red);flex-shrink:0;}
+.ch-sidebar-name{font-size:12.5px;font-weight:800;line-height:1.35;flex:1;}
+.ch-sidebar-count{font-size:10px;color:var(--muted);font-weight:700;}
 
 /* ── Footer ── */
 footer{background:var(--black);color:#aaa;padding:40px 24px 24px;margin-top:auto;}
-.footer-inner{max-width:1300px;margin:0 auto;}
+.footer-inner{max-width:1280px;margin:0 auto;}
 .footer-top{display:flex;gap:40px;flex-wrap:wrap;margin-bottom:32px;}
 .footer-brand{flex:1;min-width:220px;}
 .footer-brand p{font-size:13px;line-height:1.7;color:#666;}
@@ -170,24 +172,17 @@ footer{background:var(--black);color:#aaa;padding:40px 24px 24px;margin-top:auto
 .footer-bottom p{font-size:11.5px;color:#3a3a3a;}
 .footer-bottom span{color:var(--red);}
 
-/* ── Responsive ── */
 @media(max-width:1060px){.page-body{grid-template-columns:1fr;}.sidebar{position:static;}}
-@media(max-width:768px){
-  nav{display:none;}.hamburger{display:flex;}
-  .hero{padding:38px 18px 36px;}
-  .chapter-nav-bar{padding:0 16px;}
-  .page-body{padding:22px 16px 52px;}
-}
+@media(max-width:768px){nav{display:none;}.hamburger{display:flex;}.hero{padding:38px 18px 34px;}.ch-nav-bar{padding:0 16px;}.page-body{padding:20px 16px 52px;}.res-item{flex-direction:column;align-items:flex-start;gap:12px;}.res-action{width:100%;text-align:center;justify-content:center;}}
 </style>
+<link rel="stylesheet" href="animations.css">
 </head>
 <body>
 
 <div id="rpbar"><div id="rpfill"></div></div>
 
 <header>
-  <a class="logo-wrap" href="index.html">
-    <img src="logo.png" alt="ExamReady" style="height:44px;">
-  </a>
+  <a class="logo-wrap" href="index.html"><img src="logo.png" alt="ExamReady" style="height:44px;"></a>
   <nav id="mainNav">
     <a href="index.html">Home</a>
     <a href="class9.html">Class 9</a>
@@ -198,25 +193,19 @@ footer{background:var(--black);color:#aaa;padding:40px 24px 24px;margin-top:auto
     <a href="pyq.html">PYQs</a>
     <a href="quizzes.html">Quizzes</a>
   </nav>
-  <div class="hamburger" onclick="toggleMenu()">
-    <span></span><span></span><span></span>
-  </div>
+  <div class="hamburger" onclick="toggleMenu()"><span></span><span></span><span></span></div>
 </header>
 
-<!-- Chapter navigation bar (prev / dots / next) -->
-<div class="chapter-nav-bar" id="chapterNavBar" style="display:none">
-  <div class="chapter-nav-inner">
-    <a class="ch-nav-btn" id="prevChBtn" href="#">← Previous Chapter</a>
-    <div class="ch-nav-center" id="chDots"></div>
-    <a class="ch-nav-btn" id="nextChBtn" href="#">Next Chapter →</a>
+<!-- Chapter nav bar (prev / dots / next) — shown after render -->
+<div class="ch-nav-bar" id="chNavBar" style="display:none">
+  <div class="ch-nav-inner">
+    <a class="ch-nav-btn disabled" id="prevChBtn" href="#">← Prev</a>
+    <div class="ch-dots" id="chDots"></div>
+    <a class="ch-nav-btn disabled" id="nextChBtn" href="#">Next →</a>
   </div>
 </div>
 
-<section class="hero">
-  <div class="hero-inner" id="heroMount">
-    <div class="crumbs"><a href="index.html">Home</a><span class="crumbs-sep">›</span><span>Loading…</span></div>
-  </div>
-</section>
+<section class="hero"><div class="hero-inner" id="heroMount"><div class="crumbs"><a href="index.html">Home</a><span class="crumbs-sep">›</span><span>Loading…</span></div></div></section>
 
 <div class="page-body" id="pageBody">
   <div style="grid-column:1/-1;padding:60px 0;text-align:center;color:var(--muted);font-weight:700">Loading chapter…</div>
@@ -230,146 +219,132 @@ footer{background:var(--black);color:#aaa;padding:40px 24px 24px;margin-top:auto
         <p>Chapter-organised CBSE resources. Every PYQ, quiz, solution, and note — right where you need it.</p>
       </div>
       <div class="footer-links">
-        <div class="footer-col">
-          <h4>Classes</h4>
-          <a href="class9.html">Class 9</a>
-          <a href="class10.html">Class 10</a>
-          <a href="class11.html">Class 11</a>
-          <a href="class12.html">Class 12</a>
-        </div>
-        <div class="footer-col">
-          <h4>Resources</h4>
-          <a href="solutions.html">Solutions</a>
-          <a href="pyq.html">PYQ Papers</a>
-          <a href="questionbank.html">Question Banks</a>
-          <a href="quizzes.html">Quizzes</a>
-        </div>
+        <div class="footer-col"><h4>Classes</h4><a href="class9.html">Class 9</a><a href="class10.html">Class 10</a><a href="class11.html">Class 11</a><a href="class12.html">Class 12</a></div>
+        <div class="footer-col"><h4>Resources</h4><a href="solutions.html">Solutions</a><a href="pyq.html">PYQ Papers</a><a href="questionbank.html">Question Banks</a><a href="quizzes.html">Quizzes</a></div>
       </div>
     </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 ExamReady. Made with <span>♥</span> for students.</p>
-    </div>
+    <div class="footer-bottom"><p>&copy; 2026 ExamReady. Made with <span>♥</span> for students.</p></div>
   </div>
 </footer>
 
 <script src="shared.js"></script>
 <script src="animations.js"></script>
 <script>
-// ── Helpers ──────────────────────────────────────────────
+/* ── helpers ── */
 function toggleMenu() {
   const nav = document.getElementById('mainNav');
   if (nav.dataset.open === '1') { nav.removeAttribute('style'); nav.dataset.open = '0'; }
-  else {
-    Object.assign(nav.style,{display:'flex',flexDirection:'column',position:'absolute',top:'64px',left:'0',right:'0',background:'#111',padding:'16px',zIndex:'999'});
-    nav.dataset.open = '1';
-  }
+  else { Object.assign(nav.style,{display:'flex',flexDirection:'column',position:'absolute',top:'64px',left:'0',right:'0',background:'#111',padding:'16px',zIndex:'999'}); nav.dataset.open = '1'; }
+}
+function buildChUrl(cls, subjectKey, chId) {
+  return `chapter.html?class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(subjectKey)}&chapter=${encodeURIComponent(chId)}`;
 }
 
-function buildChapterUrl(cls, subjectKey, chapterId) {
-  return `chapter.html?class=${encodeURIComponent(cls)}&subject=${encodeURIComponent(subjectKey)}&chapter=${encodeURIComponent(chapterId)}`;
-}
-
-// ── Reading progress bar ──────────────────────────────────
+/* ── Reading progress ── */
 function initRP() {
   const fill = document.getElementById('rpfill');
   if (!fill) return;
   window.addEventListener('scroll', () => {
-    const docH = document.documentElement.scrollHeight - window.innerHeight;
-    fill.style.width = (docH > 0 ? (window.scrollY / docH) * 100 : 0) + '%';
-  }, { passive: true });
+    const d = document.documentElement.scrollHeight - window.innerHeight;
+    fill.style.width = (d > 0 ? (window.scrollY/d)*100 : 0) + '%';
+  }, { passive:true });
 }
 
-// ── Resource builders ─────────────────────────────────────
+/* ── Resource type definitions ── */
 const PDF_TYPES = [
-  { key:'pyq',   label:'PYQ Papers',           icon:'PYQ',  cls:'pyq'  },
-  { key:'qb',    label:'Question Banks',        icon:'QB',   cls:'qb'   },
-  { key:'spq',   label:'SPQ Papers',            icon:'SPQ',  cls:'spq'  },
-  { key:'ip',    label:'Institutional Papers',  icon:'INST', cls:'ip'   },
-  { key:'notes', label:'Short Notes',           icon:'NOTE', cls:'notes'},
+  { key:'pyq',   label:'PYQ Papers',          iconTxt:'PYQ',  cls:'pyq'   },
+  { key:'qb',    label:'Question Banks',       iconTxt:'QB',   cls:'qb'    },
+  { key:'spq',   label:'SPQ Papers',           iconTxt:'SPQ',  cls:'spq'   },
+  { key:'ip',    label:'Institutional Papers', iconTxt:'INST', cls:'ip'    },
+  { key:'notes', label:'Short Notes',          iconTxt:'NOTE', cls:'notes' },
 ];
 
-function buildResCards(items, type) {
-  if (!items.length) return `<div class="empty-state"><div class="empty-icon">📭</div><strong>Nothing here yet</strong><p>No ${type.label} have been added to this chapter.</p></div>`;
-  return items.map(item => `
-    <div class="res-card">
-      <div class="res-card-left">
-        <div class="res-icon ${type.cls}">${type.icon}</div>
-        <div>
-          <div class="res-badge">${type.label}</div>
-          <div class="res-title">${escapeHtml(item.name || item.title || '')}</div>
-          <div class="res-meta">${item.year ? 'Year: ' + escapeHtml(item.year) + ' · ' : ''}${escapeHtml(item.size || item.summary && getSolutionExcerpt({summary:item.summary},90) || '')}</div>
-        </div>
+/* ── Build a resource item HTML ── */
+function resItemHtml(iconTxt, iconCls, badge, title, meta, href, actionLabel, actionCls) {
+  return `<div class="res-item">
+    <div class="res-item-left">
+      <div class="res-type-icon ${escapeHtml(iconCls)}">${escapeHtml(iconTxt)}</div>
+      <div class="res-item-body">
+        <div class="res-item-badge">${escapeHtml(badge)}</div>
+        <div class="res-item-title">${escapeHtml(title)}</div>
+        <div class="res-item-meta">${escapeHtml(meta)}</div>
       </div>
-      <a class="res-link" href="${type.href(item)}">
-        ${type.linkLabel || 'Preview PDF'}
-      </a>
-    </div>`).join('');
+    </div>
+    <a class="res-action ${escapeHtml(actionCls||'')}" href="${href}">${escapeHtml(actionLabel)}</a>
+  </div>`;
 }
 
-// ── Main render ───────────────────────────────────────────
+/* ── Build a panel (or empty state) ── */
+function buildPanel(itemsHtml, emptyLabel) {
+  if (!itemsHtml) return `<div class="empty-res"><div class="e-icon">📭</div><strong>Nothing here yet</strong><p>${escapeHtml(emptyLabel)}</p></div>`;
+  return itemsHtml;
+}
+
+/* ── Count all resources in a chapter ── */
+function countChRes(allPdfs, sols, quizzes, cls, subjectKey, chId) {
+  return PDF_TYPES.reduce((a,t) => a + (allPdfs[`${cls}-${subjectKey}-${t.key}`]||[]).filter(p=>(p.chapterId||'')=== chId).length, 0)
+    + sols.filter(s=>(s.chapterId||'')=== chId).length
+    + quizzes.filter(q=>(q.chapterId||'')=== chId).length;
+}
+
+/* ── Render not found ── */
 function renderNotFound(msg) {
   document.getElementById('heroMount').innerHTML = `
-    <div class="crumbs"><a href="index.html">Home</a><span class="crumbs-sep">›</span><span>Chapter Not Found</span></div>
-    <a class="back-btn" href="index.html">← Back to Home</a>
-    <h1 style="font-family:'Bebas Neue';font-size:clamp(36px,6vw,70px);color:#fff;letter-spacing:2px;">CHAPTER <span style="color:var(--red)">NOT FOUND</span></h1>
-    <p class="hero-desc">${escapeHtml(msg || 'This chapter does not exist or has been removed.')}</p>`;
-  document.getElementById('pageBody').innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="empty-icon">🔍</div><strong>Chapter not found</strong><p>Go back to the subject page and pick a chapter from there.</p></div>`;
+    <div class="crumbs"><a href="index.html">Home</a><span class="crumbs-sep">›</span><span>Not Found</span></div>
+    <a class="back-btn" href="index.html">← Home</a>
+    <h1 style="font-family:'Bebas Neue';font-size:56px;color:#fff;letter-spacing:2px;">CHAPTER NOT FOUND</h1>
+    <p class="hero-desc">${escapeHtml(msg||'This chapter does not exist.')}</p>`;
+  document.getElementById('pageBody').innerHTML = `<div class="empty-res" style="grid-column:1/-1"><div class="e-icon">🔍</div><strong>Chapter not found</strong><p>Go back to the subject page.</p></div>`;
 }
 
+/* ── Main render ── */
 function renderPage() {
-  const params = new URLSearchParams(window.location.search);
-  const cls = params.get('class');
-  const subjectKey = params.get('subject');
-  const chapterId = params.get('chapter');
+  const p = new URLSearchParams(window.location.search);
+  const cls = p.get('class'), subjectKey = p.get('subject'), chapterId = p.get('chapter');
+  if (!cls || !subjectKey || !chapterId) { renderNotFound('Missing URL parameters.'); return; }
 
-  if (!cls || !subjectKey || !chapterId) { renderNotFound('Missing parameters in the URL.'); return; }
+  const chapters  = getChapters(cls, subjectKey);
+  const chapter   = chapters.find(c => c.id === chapterId);
+  if (!chapter) { renderNotFound('Chapter not found — it may have been deleted.'); return; }
 
-  const chapters = getChapters(cls, subjectKey);
-  const chapter = chapters.find(c => c.id === chapterId);
-  if (!chapter) { renderNotFound('Chapter not found. It may have been deleted by the admin.'); return; }
-
-  const classMeta = getClassMeta(cls);
-  const subject = getSubjectMeta(cls, subjectKey);
+  const classMeta  = getClassMeta(cls);
+  const subject    = getSubjectMeta(cls, subjectKey);
   const subjectUrl = buildSubjectPageUrl(cls, subjectKey);
-  const allPdfs = getData('pdfs') || {};
-  const allQuizzes = (getData('quizzes') || {})[`${cls}-${subjectKey}`] || [];
-  const allSols = getSolutionPostsByClassAndSubject(cls, subjectKey);
+  const allPdfs    = getData('pdfs') || {};
+  const allQuizzes = (getData('quizzes')||{})[`${cls}-${subjectKey}`] || [];
+  const allSols    = getSolutionPostsByClassAndSubject(cls, subjectKey);
 
-  // Filter resources for this chapter
-  const resMap = {};
+  /* filter to this chapter */
+  const pdfMap = {};
   PDF_TYPES.forEach(t => {
-    resMap[t.key] = (allPdfs[`${cls}-${subjectKey}-${t.key}`] || []).filter(p => (p.chapterId || '') === chapterId);
+    pdfMap[t.key] = (allPdfs[`${cls}-${subjectKey}-${t.key}`]||[]).filter(p => (p.chapterId||'') === chapterId);
   });
-  const sols = allSols.filter(s => (s.chapterId || '') === chapterId);
-  const quizzes = allQuizzes.filter(q => (q.chapterId || '') === chapterId);
+  const sols    = allSols.filter(s => (s.chapterId||'') === chapterId);
+  const quizzes = allQuizzes.filter(q => (q.chapterId||'') === chapterId);
 
-  const totalResources = Object.values(resMap).reduce((a, v) => a + v.length, 0) + sols.length + quizzes.length;
-  const totalPdfs = Object.values(resMap).reduce((a, v) => a + v.length, 0);
+  const totalPdfs = PDF_TYPES.reduce((a,t) => a + pdfMap[t.key].length, 0);
+  const totalAll  = totalPdfs + sols.length + quizzes.length;
 
-  // Chapter index & navigation
+  /* chapter nav */
   const chIdx = chapters.findIndex(c => c.id === chapterId);
   const prevCh = chapters[chIdx - 1] || null;
   const nextCh = chapters[chIdx + 1] || null;
 
-  // ── Update page title ──
+  /* page title */
   document.title = `Ch ${chapter.number}: ${chapter.name} – ${subject.label} – ExamReady`;
 
-  // ── Navigation bar ──
-  const navBar = document.getElementById('chapterNavBar');
+  /* ── Nav bar ── */
+  const navBar = document.getElementById('chNavBar');
   navBar.style.display = 'block';
   const prevBtn = document.getElementById('prevChBtn');
   const nextBtn = document.getElementById('nextChBtn');
-  if (prevCh) { prevBtn.href = buildChapterUrl(cls, subjectKey, prevCh.id); prevBtn.innerHTML = `← Ch ${prevCh.number}`; }
-  else { prevBtn.classList.add('disabled'); prevBtn.href = '#'; }
-  if (nextCh) { nextBtn.href = buildChapterUrl(cls, subjectKey, nextCh.id); nextBtn.innerHTML = `Ch ${nextCh.number} →`; }
-  else { nextBtn.classList.add('disabled'); nextBtn.href = '#'; }
-  // Dots
-  const dotsEl = document.getElementById('chDots');
-  dotsEl.innerHTML = chapters.map(ch =>
-    `<div class="ch-dot${ch.id === chapterId ? ' active' : ''}" title="Chapter ${ch.number}: ${ch.name}" onclick="window.location.href='${buildChapterUrl(cls, subjectKey, ch.id)}'"></div>`
+  if (prevCh) { prevBtn.href = buildChUrl(cls,subjectKey,prevCh.id); prevBtn.innerHTML = `← Ch ${prevCh.number}: ${prevCh.name.slice(0,18)}${prevCh.name.length>18?'…':''}`; prevBtn.classList.remove('disabled'); }
+  if (nextCh) { nextBtn.href = buildChUrl(cls,subjectKey,nextCh.id); nextBtn.innerHTML = `Ch ${nextCh.number}: ${nextCh.name.slice(0,18)}${nextCh.name.length>18?'…':''}  →`; nextBtn.classList.remove('disabled'); }
+  document.getElementById('chDots').innerHTML = chapters.map(ch =>
+    `<div class="ch-dot${ch.id===chapterId?' active':''}" title="Ch ${ch.number}: ${ch.name}" onclick="location.href='${buildChUrl(cls,subjectKey,ch.id)}'"></div>`
   ).join('');
 
-  // ── Hero ──
+  /* ── Hero ── */
   document.getElementById('heroMount').innerHTML = `
     <div class="crumbs">
       <a href="index.html">Home</a><span class="crumbs-sep">›</span>
@@ -377,13 +352,13 @@ function renderPage() {
       <a href="${subjectUrl}">${escapeHtml(subject.label)}</a><span class="crumbs-sep">›</span>
       <span>Chapter ${chapter.number}</span>
     </div>
-    <a class="back-btn" href="${subjectUrl}">← Back to ${escapeHtml(subject.label)}</a>
-    <div class="chapter-num-big">${escapeHtml(subject.icon || '📚')} ${escapeHtml(classMeta.label)} · ${escapeHtml(subject.label)} · Chapter ${chapter.number} of ${chapters.length}</div>
+    <a class="back-btn" href="${subjectUrl}">← ${escapeHtml(subject.label)}</a>
+    <div class="chapter-num-label">${escapeHtml(subject.icon||'📚')} ${escapeHtml(classMeta.label)} · ${escapeHtml(subject.label)} · Chapter ${chapter.number} of ${chapters.length}</div>
     <div class="hero-tags">
       <div class="hero-tag accent">Chapter ${chapter.number}</div>
       <div class="hero-tag">${escapeHtml(classMeta.label)}</div>
       <div class="hero-tag">${escapeHtml(subject.label)}</div>
-      <div class="hero-tag">${totalResources} Resource${totalResources !== 1 ? 's' : ''}</div>
+      <div class="hero-tag">${totalAll} Resource${totalAll!==1?'s':''}</div>
     </div>
     <h1>${escapeHtml(chapter.name)}</h1>
     ${chapter.description ? `<p class="hero-desc">${escapeHtml(chapter.description)}</p>` : ''}
@@ -391,131 +366,146 @@ function renderPage() {
       <div class="hero-stat"><strong>${totalPdfs}</strong><span>PDF Files</span></div>
       <div class="hero-stat"><strong>${sols.length}</strong><span>Solutions</span></div>
       <div class="hero-stat"><strong>${quizzes.length}</strong><span>Quizzes</span></div>
-      <div class="hero-stat"><strong>${totalResources}</strong><span>Total Items</span></div>
+      <div class="hero-stat"><strong>${totalAll}</strong><span>Total</span></div>
     </div>`;
 
-  // ── Build tabs + panels ──
-  const tabDefs = [
-    { key:'all',   label:'All Resources', count: totalResources },
-    { key:'pyq',   label:'PYQ Papers',    count: resMap.pyq.length },
-    { key:'qb',    label:'Question Banks',count: resMap.qb.length },
-    { key:'spq',   label:'SPQ',           count: resMap.spq.length },
-    { key:'ip',    label:'Inst. Papers',  count: resMap.ip.length },
-    { key:'notes', label:'Short Notes',   count: resMap.notes.length },
-    { key:'sol',   label:'Solutions',     count: sols.length },
-    { key:'quiz',  label:'Quizzes',       count: quizzes.length },
-  ].filter(t => t.key === 'all' || t.count > 0 || totalResources === 0);
+  /* ── Build HTML for each panel ── */
 
-  const tabsHtml = tabDefs.map((t, i) =>
-    `<button class="res-tab${i === 0 ? ' active' : ''}" onclick="switchResTab('${t.key}')" data-tab="${t.key}">${t.label}<span class="res-tab-count">${t.count}</span></button>`
-  ).join('');
-
+  // "All Resources" combined
   function buildAllPanel() {
     const parts = [];
-    PDF_TYPES.forEach(type => {
-      if (!resMap[type.key].length) return;
-      parts.push(`<div class="sec-title">${type.label}</div>`);
-      parts.push(buildResCards(resMap[type.key], { ...type, href: p => buildPdfPreviewUrl(p), linkLabel: 'Preview PDF' }));
+    PDF_TYPES.forEach(t => {
+      if (!pdfMap[t.key].length) return;
+      parts.push(`<div class="res-section-label">${t.label} (${pdfMap[t.key].length})</div>`);
+      pdfMap[t.key].forEach(item => parts.push(resItemHtml(t.iconTxt, t.cls, t.label,
+        item.name, [item.year ? `Year: ${item.year}` : '', item.size||''].filter(Boolean).join(' · '),
+        buildPdfPreviewUrl(item), 'Preview PDF', ''
+      )));
     });
     if (sols.length) {
-      parts.push(`<div class="sec-title">Solution Articles</div>`);
-      parts.push(buildResCards(sols, { key:'sol', label:'Solution', icon:'SOL', cls:'sol', href: s => getSolutionPostUrl(s), linkLabel: 'Read Solution' }));
+      parts.push(`<div class="res-section-label">Solution Articles (${sols.length})</div>`);
+      sols.forEach(s => parts.push(resItemHtml('SOL','sol','Solution Article',
+        s.title, getSolutionExcerpt(s, 90),
+        getSolutionPostUrl(s), 'Read Solution', 'sol-btn'
+      )));
     }
     if (quizzes.length) {
-      parts.push(`<div class="sec-title">Quizzes</div>`);
-      parts.push(buildResCards(quizzes, { key:'quiz', label:'Quiz', icon:'QUIZ', cls:'quiz', href: q => `quiz.html?id=${encodeURIComponent(q.id)}`, linkLabel: 'Open Quiz' }));
+      parts.push(`<div class="res-section-label">Quizzes (${quizzes.length})</div>`);
+      quizzes.forEach(q => parts.push(resItemHtml('QUIZ','quiz','MCQ Quiz',
+        q.title, `${(q.questions||[]).length} question${(q.questions||[]).length!==1?'s':''}`,
+        `quiz.html?id=${encodeURIComponent(q.id)}`, 'Open Quiz', 'quiz-btn'
+      )));
     }
-    if (!parts.length) {
-      return `<div class="empty-state"><div class="empty-icon">📭</div><strong>No resources yet</strong><p>The admin hasn't added any materials to this chapter. Check back later or browse other resource types from the subject page.</p></div>`;
-    }
+    if (!parts.length) return null;
     return parts.join('');
   }
 
-  const panelsHtml = tabDefs.map((t, i) => {
-    let content = '';
-    if (t.key === 'all') { content = buildAllPanel(); }
-    else if (t.key === 'sol') { content = buildResCards(sols, { key:'sol', label:'Solution', icon:'SOL', cls:'sol', href: s => getSolutionPostUrl(s), linkLabel: 'Read Solution' }); }
-    else if (t.key === 'quiz') { content = buildResCards(quizzes, { key:'quiz', label:'Quiz', icon:'QUIZ', cls:'quiz', href: q => `quiz.html?id=${encodeURIComponent(q.id)}`, linkLabel: 'Open Quiz' }); }
-    else {
-      const type = PDF_TYPES.find(pt => pt.key === t.key);
-      content = buildResCards(resMap[t.key], { ...type, href: p => buildPdfPreviewUrl(p), linkLabel: 'Preview PDF' });
-    }
-    return `<div class="res-panel${i === 0 ? ' active' : ''}" data-panel="${t.key}">${content}</div>`;
-  }).join('');
+  /* ── Tab definitions (only show non-empty after "All") ── */
+  const visibleTabs = [
+    { key:'all',   label:'All Resources', count:totalAll },
+    ...PDF_TYPES.map(t => ({ key:t.key, label:t.label, count:pdfMap[t.key].length })).filter(t => t.count > 0),
+    ...(sols.length   ? [{ key:'sol',  label:'Solutions', count:sols.length }]   : []),
+    ...(quizzes.length? [{ key:'quiz', label:'Quizzes',   count:quizzes.length }]: []),
+  ];
 
-  // ── Sidebar chapter list ──
-  const chListHtml = chapters.map(ch => {
-    const chRes = PDF_TYPES.reduce((a, t) => a + (allPdfs[`${cls}-${subjectKey}-${t.key}`] || []).filter(p => (p.chapterId||'') === ch.id).length, 0)
-      + allSols.filter(s => (s.chapterId||'') === ch.id).length
-      + allQuizzes.filter(q => (q.chapterId||'') === ch.id).length;
-    return `<a class="ch-list-item${ch.id === chapterId ? ' active' : ''}" href="${buildChapterUrl(cls, subjectKey, ch.id)}">
-      <span class="ch-num-badge">Ch ${ch.number}</span>
-      <div>
-        <div class="ch-list-name">${escapeHtml(ch.name)}</div>
-        <div class="ch-list-count">${chRes} resource${chRes !== 1 ? 's' : ''}</div>
-      </div>
-    </a>`;
-  }).join('');
+  const tabsHtml = visibleTabs.map((t,i) => `
+    <button class="res-tab${i===0?' active':''}" data-tab="${t.key}" onclick="switchTab('${t.key}')">
+      ${t.label}<span class="tab-count">${t.count}</span>
+    </button>`).join('');
 
-  // ── Next/Prev chapter cards (at bottom of content) ──
-  function chCard(ch, label) {
-    if (!ch) return `<div style="flex:1;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;font-weight:700">${label === 'prev' ? 'No previous chapter' : 'No next chapter'}</div>`;
-    return `<a href="${buildChapterUrl(cls, subjectKey, ch.id)}" style="flex:1;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;text-decoration:none;color:inherit;transition:border-color .2s,box-shadow .2s;display:block;" onmouseenter="this.style.borderColor='var(--red)'" onmouseleave="this.style.borderColor='var(--border)'">
-      <div style="font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px">${label === 'prev' ? '← Previous' : 'Next →'}</div>
-      <div style="font-size:14px;font-weight:900;color:var(--text)">Ch ${ch.number}: ${escapeHtml(ch.name)}</div>
+  /* ── Panel content ── */
+  function getPanelContent(key) {
+    if (key === 'all') return buildPanel(buildAllPanel(), `No resources assigned to Chapter ${chapter.number} yet.`);
+    if (key === 'sol') return buildPanel(sols.map(s => resItemHtml('SOL','sol','Solution Article', s.title, getSolutionExcerpt(s,90), getSolutionPostUrl(s),'Read Solution','sol-btn')).join('')||null, 'No solution articles assigned to this chapter.');
+    if (key === 'quiz') return buildPanel(quizzes.map(q => resItemHtml('QUIZ','quiz','MCQ Quiz', q.title, `${(q.questions||[]).length} questions`, `quiz.html?id=${encodeURIComponent(q.id)}`,'Open Quiz','quiz-btn')).join('')||null, 'No quizzes assigned to this chapter.');
+    const t = PDF_TYPES.find(x => x.key === key);
+    return buildPanel(pdfMap[key].map(item => resItemHtml(t.iconTxt, t.cls, t.label,
+      item.name, [item.year?`Year: ${item.year}`:'', item.size||''].filter(Boolean).join(' · '),
+      buildPdfPreviewUrl(item), 'Preview PDF', ''
+    )).join('')||null, `No ${t.label} assigned to this chapter.`);
+  }
+
+  const panelsHtml = visibleTabs.map((t,i) =>
+    `<div class="res-panel${i===0?' active':''}" data-panel="${t.key}">${getPanelContent(t.key)}</div>`
+  ).join('');
+
+  /* ── Prev / Next nav cards ── */
+  function navCard(ch, dir) {
+    if (!ch) return `<div class="ch-nav-card disabled"><div class="ch-nav-card-label">${dir === 'prev' ? '← Previous' : 'Next →'}</div><div class="ch-nav-card-title">No ${dir === 'prev' ? 'previous' : 'next'} chapter</div></div>`;
+    return `<a class="ch-nav-card" href="${buildChUrl(cls, subjectKey, ch.id)}">
+      <div class="ch-nav-card-label">${dir === 'prev' ? '← Previous Chapter' : 'Next Chapter →'}</div>
+      <div class="ch-nav-card-title">Ch ${ch.number}: ${escapeHtml(ch.name)}</div>
     </a>`;
   }
 
-  // ── Assemble page ──
-  document.getElementById('pageBody').innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:20px;">
+  /* ── Sidebar chapter list ── */
+  const chSidebarHtml = chapters.map(ch => {
+    const res = countChRes(allPdfs, allSols, allQuizzes, cls, subjectKey, ch.id);
+    return `<a class="ch-sidebar-item${ch.id===chapterId?' active-ch':''}" href="${buildChUrl(cls,subjectKey,ch.id)}">
+      <span class="ch-sidebar-num">Ch ${ch.number}</span>
+      <div style="flex:1;min-width:0">
+        <div class="ch-sidebar-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(ch.name)}</div>
+        <div class="ch-sidebar-count">${res} resource${res!==1?'s':''}</div>
+      </div>
+    </a>`;
+  }).join('');
 
-      <div class="content-card">
-        <div class="content-card-head">
-          <div class="sec-title" style="margin-bottom:0">Resources for this Chapter</div>
-        </div>
-        <div class="content-card-body">
+  /* ── Assemble page ── */
+  document.getElementById('pageBody').innerHTML = `
+    <div class="main-content">
+
+      <div class="resources-card">
+        <div class="resources-card-head">
+          <div class="resources-card-kicker">Resources for Chapter ${chapter.number}: ${escapeHtml(chapter.name)}</div>
           <div class="res-tabs">${tabsHtml}</div>
-          <div id="resPanels">${panelsHtml}</div>
         </div>
+        <div class="res-panels">${panelsHtml}</div>
       </div>
 
-      <!-- Chapter navigation cards -->
-      <div style="display:flex;gap:14px;flex-wrap:wrap;">
-        ${chCard(prevCh, 'prev')}
-        ${chCard(nextCh, 'next')}
+      <div class="chapter-nav-cards">
+        ${navCard(prevCh, 'prev')}
+        ${navCard(nextCh, 'next')}
       </div>
 
     </div>
 
-    <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-card">
-        <div class="sidebar-card-head"><div class="sidebar-heading">Subject Info</div></div>
+        <div class="sidebar-card-head"><div class="sidebar-heading">Chapter Info</div></div>
         <div class="sidebar-body">
           <div class="info-row"><span>Class</span><span>${escapeHtml(classMeta.label)}</span></div>
           <div class="info-row"><span>Subject</span><span>${escapeHtml(subject.label)}</span></div>
           <div class="info-row"><span>Chapter</span><span>${chapter.number} of ${chapters.length}</span></div>
-          <div class="info-row"><span>Resources</span><span>${totalResources}</span></div>
-          <a class="all-ch-btn" href="${subjectUrl}">View All Chapters →</a>
+          <div class="info-row"><span>PDF Files</span><span>${totalPdfs}</span></div>
+          <div class="info-row"><span>Solutions</span><span>${sols.length}</span></div>
+          <div class="info-row"><span>Quizzes</span><span>${quizzes.length}</span></div>
         </div>
       </div>
 
       <div class="sidebar-card">
         <div class="sidebar-card-head"><div class="sidebar-heading">All Chapters</div></div>
-        <div class="sidebar-body" style="padding:8px 8px;">
-          <div class="chapter-list-sidebar">${chListHtml || '<div style="padding:8px;font-size:12px;color:var(--muted);font-weight:700">No chapters found.</div>'}</div>
+        <div class="sidebar-body" style="padding:8px;">
+          <div class="ch-sidebar-list">${chSidebarHtml}</div>
         </div>
       </div>
-    </aside>
-  `;
+
+      <div class="sidebar-card">
+        <div class="sidebar-card-head"><div class="sidebar-heading">Quick Links</div></div>
+        <div class="sidebar-body" style="display:flex;flex-direction:column;gap:8px;">
+          <a href="${subjectUrl}" style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:inherit;font-size:12.5px;font-weight:800;transition:.2s;" onmouseenter="this.style.borderColor='var(--red)'" onmouseleave="this.style.borderColor='var(--border)'">📚 All ${escapeHtml(subject.label)} Resources</a>
+          <a href="quizzes.html" style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:inherit;font-size:12.5px;font-weight:800;transition:.2s;" onmouseenter="this.style.borderColor='var(--red)'" onmouseleave="this.style.borderColor='var(--border)'">🎯 All Quizzes</a>
+          <a href="solutions.html" style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:inherit;font-size:12.5px;font-weight:800;transition:.2s;" onmouseenter="this.style.borderColor='var(--red)'" onmouseleave="this.style.borderColor='var(--border)'">📖 All Solutions</a>
+          <a href="pyq.html" style="display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;text-decoration:none;color:inherit;font-size:12.5px;font-weight:800;transition:.2s;" onmouseenter="this.style.borderColor='var(--red)'" onmouseleave="this.style.borderColor='var(--border)'">📄 All PYQ Papers</a>
+        </div>
+      </div>
+    </aside>`;
 
   initRP();
 }
 
-function switchResTab(key) {
-  document.querySelectorAll('.res-tab').forEach(btn => btn.classList.toggle('active', btn.dataset.tab === key));
-  document.querySelectorAll('.res-panel').forEach(panel => panel.classList.toggle('active', panel.dataset.panel === key));
+function switchTab(key) {
+  document.querySelectorAll('.res-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === key));
+  document.querySelectorAll('.res-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === key));
 }
 
 renderPage();

@@ -95,7 +95,6 @@ function setData(key, val) {
   localStorage.setItem('examready_' + key, JSON.stringify(val));
 }
 
-// FIX Bug 6: timestamp prefix prevents ID collisions on rapid creation
 function genId() {
   return 'id_' + Date.now().toString(36) + '_' + Math.random().toString(36).substr(2, 9);
 }
@@ -168,42 +167,29 @@ function getDefaultSubjectsMap() {
   return JSON.parse(JSON.stringify(DEFAULT_SUBJECTS_MAP));
 }
 
-// FIX Bug 1 (CRITICAL): mergeSubjectsMap now handles empty arrays correctly.
-// Rule: if customMap has a NON-EMPTY array for a class, use it (admin's choice).
-//       if customMap has an empty array OR undefined for a class, fall back to defaults.
-// This prevents localStorage corruption (accidental empty saves) from wiping subjects.
 function mergeSubjectsMap(customMap) {
   if (!customMap || typeof customMap !== 'object' || Array.isArray(customMap)) {
     return getDefaultSubjectsMap();
   }
-
   const defaults = getDefaultSubjectsMap();
   const merged = {};
   const allClasses = new Set([...Object.keys(defaults), ...Object.keys(customMap)]);
-
   allClasses.forEach(cls => {
     const defaultList = defaults[cls] || [];
     const customList = customMap[cls];
-
     if (Array.isArray(customList) && customList.length > 0) {
-      // Admin has a non-empty list for this class — respect it.
-      // Fill in any missing metadata (icon, stream) from the default for matching keys.
       const defaultByKey = new Map(defaultList.map(s => [s.key, s]));
       merged[cls] = customList.map(subject => ({
         ...(defaultByKey.get(subject.key) || {}),
         ...subject
       }));
     } else {
-      // Empty array, undefined, or null — always fall back to defaults.
-      // Covers: fresh install, corrupted data, accidental clearing.
       merged[cls] = defaultList.slice();
     }
   });
-
   return merged;
 }
 
-// FIX: getSubjectsMap with multiple safety layers
 function getSubjectsMap() {
   try {
     const raw = localStorage.getItem('er_subjects_map');
@@ -213,7 +199,6 @@ function getSubjectsMap() {
       return getDefaultSubjectsMap();
     }
     const merged = mergeSubjectsMap(parsed);
-    // Final safety net: ensure all 4 core classes always have subjects
     const defaults = getDefaultSubjectsMap();
     ['9', '10', '11', '12'].forEach(cls => {
       if (!Array.isArray(merged[cls]) || merged[cls].length === 0) {
@@ -226,7 +211,6 @@ function getSubjectsMap() {
   }
 }
 
-// FIX Bug 8: capitalize each hyphen-separated word in fallback
 function getSubjectLabel(cls, key) {
   const map = getSubjectsMap();
   const subjects = map[cls] || [];
@@ -305,10 +289,8 @@ function getPreviewEmbedUrl(url) {
   const resolved = getResolvedFileUrl(url);
   if (!resolved || resolved === '#') return '#';
   if (resolved.startsWith('data:')) return resolved;
-
   const driveFileMatch = resolved.match(/drive\.google\.com\/file\/d\/([^/]+)/);
   if (driveFileMatch) return `https://drive.google.com/file/d/${driveFileMatch[1]}/preview`;
-
   const driveOpenMatch = resolved.match(/[?&]id=([^&]+)/);
   if (resolved.includes('drive.google.com') && driveOpenMatch) {
     return `https://drive.google.com/file/d/${driveOpenMatch[1]}/preview`;
@@ -322,7 +304,6 @@ function buildPdfPreviewUrl(itemOrUrl, title) {
   return `pdf-viewer.html?title=${encodeURIComponent(rawTitle)}&url=${encodeURIComponent(rawUrl)}`;
 }
 
-// FIX Bug 2: skip legal pages that already have hardcoded Legal column/social icons
 function addFooterLegalLinks() {
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
   if (['privacy.html', 'terms.html', 'disclaimer.html'].includes(currentPage)) return;
@@ -526,7 +507,6 @@ function applySiteConfig() {
   if (navItems && Array.isArray(navItems)) {
     const nav = document.getElementById('mainNav');
     if (nav) {
-      // FIX Bug 3: exact filename match, not loose .includes()
       const current = window.location.pathname.split('/').pop() || 'index.html';
       nav.innerHTML = navItems.map(item => {
         const isActive = item.url === current;
@@ -541,7 +521,6 @@ function applySiteConfig() {
     bar.id = 'siteAnnouncement';
     bar.style.cssText = `background:${escapeHtml(ann.color || '#e8211a')};color:#fff;padding:10px 20px;text-align:center;font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:12px;position:relative;z-index:999`;
 
-    // FIX Bug 7: use DOM methods to prevent XSS from admin-controlled text
     const textNode = document.createTextNode(ann.text);
     if (ann.link) {
       const a = document.createElement('a');
@@ -668,7 +647,6 @@ function getSolutionExcerpt(post, maxLength = 160) {
   return raw.length > maxLength ? raw.slice(0, maxLength - 1) + '...' : raw;
 }
 
-// FIX Bug 5: robust date formatting with full try/catch
 function formatHumanDate(value) {
   if (!value) return 'Recently updated';
   try {
@@ -692,332 +670,286 @@ function formatSolutionContent(content) {
 }
 
 // ===== AD SYSTEM =====
-const DEFAULT_AD_SLOTS = {
-  top:            { enabled:true, adCode:'', label:'Top Banner',               note:'Appears after hero, before main content.' },
-  inline:         { enabled:true, adCode:'', label:'Mid-Page / Inline',        note:'Appears between content sections.' },
-  between:        { enabled:true, adCode:'', label:'Between Sections',         note:'Injected between the 2nd and 3rd class/content sections on listing pages (PYQ, Quizzes, QB, Solutions).' },
-  footer:         { enabled:true, adCode:'', label:'Pre-Footer Banner',        note:'Appears just above the footer.' },
-  results:        { enabled:true, adCode:'', label:'Results / Post-Article',   note:'Appears after quiz results and solution articles.' },
-  sticky:         { enabled:true, adCode:'', label:'Sticky Sidebar (Desktop)', note:'Fixed sidebar on desktop (≥1280px), appears on scroll.' },
-  mobile_bottom:  { enabled:true, adCode:'', label:'Mobile Sticky Bottom Bar', note:'Fixed bottom banner on mobile (≤768px). Slides up after 3s, dismissible. High CTR, non-intrusive.' }
+// ─────────────────────────────────────────────────────────────────────────────
+// MASTER SLOT REGISTRY
+// Single source of truth for ALL ad slots across shared.js AND ads.js.
+// Admin writes to er_ad_slots; both systems read from the same storage.
+// ─────────────────────────────────────────────────────────────────────────────
+const AD_SLOT_REGISTRY = {
+  // ── Global — All Pages ──
+  top:              { label:'Top Banner (shared.js)',          enabled:true, adCode:'' },
+  top_banner:       { label:'Top Banner (ads.js)',             enabled:true, adCode:'' },
+  footer:           { label:'Pre-Footer Banner (shared.js)',   enabled:true, adCode:'' },
+  pre_footer:       { label:'Pre-Footer Banner (ads.js)',      enabled:true, adCode:'' },
+
+  // ── In-Content Breaks ──
+  inline:           { label:'Inline Break (shared.js)',        enabled:true, adCode:'' },
+  inline_1:         { label:'Inline Break 1 (ads.js)',         enabled:true, adCode:'' },
+  inline_2:         { label:'Inline Break 2 (ads.js)',         enabled:true, adCode:'' },
+  inline_3:         { label:'Inline Break 3 (ads.js)',         enabled:true, adCode:'' },
+  between:          { label:'Between Sections (shared.js)',    enabled:true, adCode:'' },
+  between_sections: { label:'Between Sections (ads.js)',       enabled:true, adCode:'' },
+
+  // ── High-Intent Pages ──
+  results:          { label:'Results / Post-Article (shared)', enabled:true, adCode:'' },
+  results_banner:   { label:'Results Banner (ads.js)',         enabled:true, adCode:'' },
+  solution_mid:     { label:'Mid-Article (ads.js)',            enabled:true, adCode:'' },
+  quiz_sidebar:     { label:'Quiz Sidebar (ads.js)',           enabled:true, adCode:'' },
+
+  // ── Sticky / Persistent ──
+  sticky:           { label:'Sticky Sidebar (shared.js)',      enabled:true, adCode:'' },
+  sidebar_sticky:   { label:'Sticky Sidebar (ads.js)',         enabled:true, adCode:'' },
+  mobile_bottom:    { label:'Mobile Sticky Bottom Bar',        enabled:true, adCode:'' },
 };
 
+/**
+ * getAdSlots() — returns ALL known slots merged with admin-saved values.
+ * Any slot key saved by admin is included even if not in the registry.
+ */
 function getAdSlots() {
   try {
     const saved = JSON.parse(localStorage.getItem('er_ad_slots') || '{}');
     const merged = {};
-    Object.keys(DEFAULT_AD_SLOTS).forEach(k => {
-      merged[k] = { ...DEFAULT_AD_SLOTS[k], ...(saved[k] || {}) };
+    // Start with registry defaults
+    Object.entries(AD_SLOT_REGISTRY).forEach(([k, defaults]) => {
+      merged[k] = { ...defaults, ...(saved[k] || {}) };
+    });
+    // Also include any extra slots admin may have saved (future-proof)
+    Object.entries(saved).forEach(([k, v]) => {
+      if (!merged[k]) merged[k] = { enabled: true, adCode: '', label: k, ...v };
     });
     return merged;
-  } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_AD_SLOTS)); }
-}
-
-function ensureSmartAdStyles() {
-  if (document.getElementById('smartAdStyles')) return;
-  const style = document.createElement('style');
-  style.id = 'smartAdStyles';
-  style.textContent = `
-    /* ── Ad Shell Wrapper ── */
-    .er-ad-shell{max-width:1200px;margin:0 auto 28px;padding:0 24px;width:100%}
-    .er-ad-shell.compact{margin-bottom:18px}
-    .er-ad-shell-inner{width:100%;overflow:hidden;}
-
-    /* ── Empty placeholder (no ad code yet) ── */
-    .er-ad-placeholder{
-      border:1.5px dashed #e0e0e3;border-radius:16px;
-      background:#fafafa;padding:18px 22px;
-      display:flex;align-items:center;gap:14px;
-      color:#aaa;font-size:12px;font-weight:700;
-    }
-    .er-ad-placeholder-icon{font-size:22px;opacity:.45;}
-
-    /* ── Results slot placeholder ── */
-    .er-results-ad-placeholder{
-      border-radius:16px;border:1.5px dashed #333;
-      background:#111;padding:20px 24px;
-      display:flex;align-items:center;gap:14px;
-      color:#555;font-size:12px;font-weight:700;
-      margin:22px 0;
-    }
-
-    /* ── Between sections label ── */
-    .er-between-ad-wrap{
-      max-width:1200px;margin:0 auto 24px;padding:0 24px;
-    }
-    .er-between-ad-label{
-      font-size:9px;font-weight:800;text-transform:uppercase;
-      letter-spacing:1.5px;color:#bbb;text-align:center;
-      margin-bottom:6px;
-    }
-
-    /* ── Sticky Sidebar shell ── */
-    #er-sticky-ad{
-      position:fixed;right:18px;top:50%;transform:translateY(-50%);
-      width:160px;z-index:900;
-      background:#fff;border:1px solid #e8e8ea;border-radius:18px;
-      box-shadow:0 12px 40px rgba(0,0,0,0.12);
-      overflow:hidden;
-      opacity:0;pointer-events:none;
-      transition:opacity .4s ease,transform .4s cubic-bezier(0.22,1,0.36,1);
-    }
-    #er-sticky-ad.er-sticky-visible{opacity:1;pointer-events:auto}
-    .er-sticky-close{
-      position:absolute;top:6px;right:6px;width:20px;height:20px;
-      background:rgba(0,0,0,0.07);border:none;border-radius:50%;cursor:pointer;
-      font-size:10px;color:#888;display:flex;align-items:center;justify-content:center;
-      transition:background .15s;z-index:2;
-    }
-    .er-sticky-close:hover{background:rgba(232,33,26,0.12);color:#e8211a}
-    .er-sticky-inner{padding:10px;}
-
-    /* ── Mobile Sticky Bottom Bar ── */
-    #er-mobile-bottom-ad{
-      position:fixed;bottom:0;left:0;right:0;z-index:1300;
-      background:#fff;border-top:1px solid #e8e8ea;
-      box-shadow:0 -4px 24px rgba(0,0,0,0.12);
-      padding:0;
-      transform:translateY(100%);
-      transition:transform .4s cubic-bezier(0.22,1,0.36,1);
-      pointer-events:none;
-    }
-    #er-mobile-bottom-ad.er-mba-visible{
-      transform:translateY(0);
-      pointer-events:auto;
-    }
-    .er-mba-inner{
-      display:flex;align-items:center;
-      padding:8px 12px;
-      gap:10px;
-      min-height:56px;
-      max-width:100%;
-      overflow:hidden;
-    }
-    .er-mba-close{
-      flex-shrink:0;width:26px;height:26px;border-radius:50%;
-      background:#f0f0f0;border:none;cursor:pointer;
-      font-size:12px;color:#666;
-      display:flex;align-items:center;justify-content:center;
-      transition:background .15s;
-      margin-left:auto;
-    }
-    .er-mba-close:hover{background:#ffd5d3;color:#e8211a}
-    .er-mba-content{flex:1;min-width:0;overflow:hidden;}
-    .er-mba-label{
-      font-size:8px;font-weight:900;text-transform:uppercase;
-      letter-spacing:1.5px;color:#bbb;line-height:1;margin-bottom:2px;
-    }
-    /* body padding so content isn't hidden behind bottom bar */
-    body.er-has-mba{padding-bottom:64px!important;}
-
-    @media(max-width:768px){.er-ad-shell{padding:0 16px}}
-    @media(max-width:1279px){#er-sticky-ad{display:none!important}}
-    @media(min-width:769px){#er-mobile-bottom-ad{display:none!important}}
-  `;
-  document.head.appendChild(style);
-}
-
-/* ── Execute ad scripts after inserting innerHTML ── */
-function activateAdScripts(container) {
-  container.querySelectorAll('script').forEach(oldScript => {
-    const newScript = document.createElement('script');
-    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
-    newScript.textContent = oldScript.textContent;
-    oldScript.parentNode.replaceChild(newScript, oldScript);
-  });
-}
-
-/* ── Build a slot element: raw ad code if set, empty string if disabled, placeholder if no code ── */
-function buildAdSlotElement(slotName, config) {
-  if (config.enabled === false) return null;
-
-  const adCode = (config.adCode || '').trim();
-  const wrapper = document.createElement('div');
-  wrapper.dataset.autoAd = slotName;
-
-  if (adCode) {
-    // Real ad code — render it in a clean wrapper
-    if (slotName === 'sticky') {
-      wrapper.id = 'er-sticky-ad';
-      const closeBtn = document.createElement('button');
-      closeBtn.className = 'er-sticky-close';
-      closeBtn.setAttribute('aria-label', 'Close');
-      closeBtn.textContent = '✕';
-      closeBtn.onclick = () => {
-        wrapper.style.opacity = '0';
-        wrapper.style.pointerEvents = 'none';
-        sessionStorage.setItem('er_sticky_dismissed', '1');
-      };
-      wrapper.appendChild(closeBtn);
-      const inner = document.createElement('div');
-      inner.className = 'er-sticky-inner';
-      inner.innerHTML = adCode;
-      wrapper.appendChild(inner);
-      activateAdScripts(inner);
-    } else {
-      const shell = document.createElement('div');
-      shell.className = `er-ad-shell${config.compact ? ' compact' : ''}`;
-      const inner = document.createElement('div');
-      inner.className = 'er-ad-shell-inner';
-      inner.innerHTML = adCode;
-      shell.appendChild(inner);
-      wrapper.appendChild(shell);
-      activateAdScripts(inner);
-    }
-  } else {
-    // No ad code — render nothing (clean site, no placeholder noise on live pages)
-    return null;
+  } catch(e) {
+    return JSON.parse(JSON.stringify(AD_SLOT_REGISTRY));
   }
-
-  return wrapper;
 }
 
-/* ── getManagedAdSlotHtml — returns HTML string for inline use (solutions.html etc.) ── */
-function getManagedAdSlotHtml(slotName, fallback = {}) {
-  ensureSmartAdStyles();
+function saveAdSlots(slots) {
+  localStorage.setItem('er_ad_slots', JSON.stringify(slots));
+}
+
+// ─── Slot helpers ───────────────────────────────────────────────────────────
+function _slotEnabled(slots, key) {
+  return slots[key]?.enabled !== false;
+}
+
+function _slotCode(slots, key) {
+  return (slots[key]?.adCode || '').trim();
+}
+
+// ─── Inject real ad code (or nothing if no code) ────────────────────────────
+function _buildAdElement(slots, key, wrapperClass) {
+  if (!_slotEnabled(slots, key)) return null;
+  const code = _slotCode(slots, key);
+  if (!code) return null;         // No placeholder noise — only inject real ads
+
+  const wrap = document.createElement('div');
+  wrap.dataset.erAdSlot = key;
+  wrap.className = wrapperClass || 'er-ad-shell';
+  wrap.innerHTML = code;
+  // Re-execute any scripts inside the ad code
+  wrap.querySelectorAll('script').forEach(old => {
+    const s = document.createElement('script');
+    Array.from(old.attributes).forEach(a => s.setAttribute(a.name, a.value));
+    s.textContent = old.textContent;
+    old.parentNode.replaceChild(s, old);
+  });
+  return wrap;
+}
+
+/** getManagedAdSlotHtml — inline HTML string for pages that use template literals */
+function getManagedAdSlotHtml(key) {
   const slots = getAdSlots();
-  const config = { ...(slots[slotName] || {}), slot: slotName };
-  if (config.enabled === false) return '';
-  const adCode = (config.adCode || '').trim();
-  if (!adCode) return '';
-  // Wrap in shell
-  return `<div data-auto-ad="${escapeHtml(slotName)}" class="er-ad-shell${config.compact ? ' compact' : ''}"><div class="er-ad-shell-inner">${adCode}</div></div>`;
+  if (!_slotEnabled(slots, key)) return '';
+  const code = _slotCode(slots, key);
+  if (!code) return '';
+  return `<div data-er-ad-slot="${escapeHtml(key)}" class="er-ad-shell">${code}</div>`;
 }
 
-/* ─── Mobile Sticky Bottom Bar (mobile ≤768px, slides up after 3s) ─── */
-function injectMobileBottomAd(config) {
-  if (document.getElementById('er-mobile-bottom-ad')) return;
-  if (sessionStorage.getItem('er_mba_dismissed') === '1') return;
-  if (window.innerWidth > 768) return; // desktop: don't inject at all
+// ─── Sticky Sidebar (desktop ≥1280px) ───────────────────────────────────────
+function _injectStickySidebar(slots) {
+  // Use 'sticky' key (shared.js canonical); fall back to 'sidebar_sticky' (ads.js key)
+  const key = _slotCode(slots, 'sticky') ? 'sticky' : 'sidebar_sticky';
+  if (!_slotEnabled(slots, key)) return;
+  const code = _slotCode(slots, key);
+  if (!code) return;
+  if (document.getElementById('er-sticky-sidebar')) return;
+  if (sessionStorage.getItem('er_sticky_dismissed') === '1') return;
+  if (window.innerWidth < 1280) return;
 
-  const adCode = (config.adCode || '').trim();
-  if (!adCode) return;
+  const wrap = document.createElement('div');
+  wrap.id = 'er-sticky-sidebar';
+  wrap.dataset.erAdSlot = key;
+  wrap.style.cssText = 'position:fixed;right:18px;top:50%;transform:translateY(-50%);width:160px;z-index:900;background:#fff;border:1px solid #e8e8ea;border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,0.12);overflow:hidden;opacity:0;pointer-events:none;transition:opacity .4s ease;';
 
-  const bar = document.createElement('div');
-  bar.id = 'er-mobile-bottom-ad';
-  bar.setAttribute('role', 'complementary');
-  bar.setAttribute('aria-label', 'Sponsored content');
+  const closeBtn = document.createElement('button');
+  closeBtn.style.cssText = 'position:absolute;top:6px;right:6px;width:20px;height:20px;background:rgba(0,0,0,0.07);border:none;border-radius:50%;cursor:pointer;font-size:10px;color:#888;display:flex;align-items:center;justify-content:center;z-index:2;';
+  closeBtn.textContent = '✕';
+  closeBtn.setAttribute('aria-label', 'Close ad');
+  closeBtn.onclick = () => {
+    wrap.style.opacity = '0';
+    wrap.style.pointerEvents = 'none';
+    sessionStorage.setItem('er_sticky_dismissed', '1');
+    setTimeout(() => wrap.remove(), 420);
+  };
+  wrap.appendChild(closeBtn);
 
   const inner = document.createElement('div');
-  inner.className = 'er-mba-inner';
+  inner.style.padding = '10px';
+  inner.innerHTML = code;
+  wrap.appendChild(inner);
+  inner.querySelectorAll('script').forEach(old => {
+    const s = document.createElement('script');
+    Array.from(old.attributes).forEach(a => s.setAttribute(a.name, a.value));
+    s.textContent = old.textContent;
+    old.parentNode.replaceChild(s, old);
+  });
+
+  document.body.appendChild(wrap);
+
+  setTimeout(() => {
+    wrap.style.opacity = '1';
+    wrap.style.pointerEvents = 'auto';
+  }, 2000);
+
+  window.addEventListener('scroll', () => {
+    if (sessionStorage.getItem('er_sticky_dismissed') === '1') return;
+    if (window.scrollY > 300) {
+      wrap.style.opacity = '1';
+      wrap.style.pointerEvents = 'auto';
+    }
+  }, { passive: true });
+}
+
+// ─── Mobile Sticky Bottom Bar ────────────────────────────────────────────────
+function _injectMobileBottom(slots) {
+  const key = 'mobile_bottom';
+  if (!_slotEnabled(slots, key)) return;
+  const code = _slotCode(slots, key);
+  if (!code) return;
+  if (document.getElementById('er-mobile-bottom')) return;
+  if (sessionStorage.getItem('er_mba_dismissed') === '1') return;
+  if (window.innerWidth > 768) return;
+
+  const bar = document.createElement('div');
+  bar.id = 'er-mobile-bottom';
+  bar.dataset.erAdSlot = key;
+  bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:1300;background:#fff;border-top:1px solid #e8e8ea;box-shadow:0 -4px 24px rgba(0,0,0,0.12);transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);pointer-events:none;';
+
+  const inner = document.createElement('div');
+  inner.style.cssText = 'display:flex;align-items:center;padding:8px 12px;gap:10px;min-height:56px;max-width:100%;overflow:hidden;';
 
   const contentWrap = document.createElement('div');
-  contentWrap.className = 'er-mba-content';
+  contentWrap.style.flex = '1';
   const label = document.createElement('div');
-  label.className = 'er-mba-label';
+  label.style.cssText = 'font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:#bbb;line-height:1;margin-bottom:2px;';
   label.textContent = 'Sponsored';
   contentWrap.appendChild(label);
   const adInner = document.createElement('div');
-  adInner.innerHTML = adCode;
+  adInner.innerHTML = code;
   contentWrap.appendChild(adInner);
   inner.appendChild(contentWrap);
 
   const closeBtn = document.createElement('button');
-  closeBtn.className = 'er-mba-close';
-  closeBtn.setAttribute('aria-label', 'Close ad');
+  closeBtn.style.cssText = 'flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#f0f0f0;border:none;cursor:pointer;font-size:12px;color:#666;display:flex;align-items:center;justify-content:center;';
   closeBtn.textContent = '✕';
   closeBtn.onclick = () => {
-    bar.classList.remove('er-mba-visible');
-    setTimeout(() => {
-      bar.remove();
-      document.body.classList.remove('er-has-mba');
-    }, 420);
+    bar.style.transform = 'translateY(100%)';
+    document.body.style.paddingBottom = '';
     sessionStorage.setItem('er_mba_dismissed', '1');
+    setTimeout(() => bar.remove(), 420);
   };
   inner.appendChild(closeBtn);
   bar.appendChild(inner);
   document.body.appendChild(bar);
-  activateAdScripts(adInner);
 
-  // Slide up after 3 seconds — not immediate, so user can start reading first
+  adInner.querySelectorAll('script').forEach(old => {
+    const s = document.createElement('script');
+    Array.from(old.attributes).forEach(a => s.setAttribute(a.name, a.value));
+    s.textContent = old.textContent;
+    old.parentNode.replaceChild(s, old);
+  });
+
   setTimeout(() => {
-    bar.classList.add('er-mba-visible');
-    document.body.classList.add('er-has-mba');
+    bar.style.transform = 'translateY(0)';
+    bar.style.pointerEvents = 'auto';
+    document.body.style.paddingBottom = '66px';
   }, 3000);
 }
 
-/* ─── Between Sections — injected between 2nd and 3rd .class-section blocks ─── */
-function injectBetweenSectionsAd(config) {
-  if (!config || config.enabled === false) return;
-  const adCode = (config.adCode || '').trim();
-  if (!adCode) return;
-  if (document.querySelector('[data-auto-ad="between"]')) return;
+// ─── Between-Sections ad ─────────────────────────────────────────────────────
+function _injectBetweenSections(slots) {
+  const key = _slotCode(slots, 'between') ? 'between' : 'between_sections';
+  if (!_slotEnabled(slots, key)) return;
+  const code = _slotCode(slots, key);
+  if (!code) return;
+  if (document.querySelector('[data-er-ad-slot="between"],[data-er-ad-slot="between_sections"]')) return;
 
-  // Target pages that render multiple .class-section blocks
-  const sections = document.querySelectorAll('.class-section');
+  const sections = document.querySelectorAll('.class-section, .stream-section, .subject-group');
   if (sections.length < 2) return;
+  const target = sections[Math.min(1, sections.length - 1)];
 
-  const targetSection = sections[Math.min(1, sections.length - 1)]; // after 2nd
   const wrap = document.createElement('div');
-  wrap.className = 'er-between-ad-wrap';
-  wrap.dataset.autoAd = 'between';
+  wrap.dataset.erAdSlot = key;
+  wrap.style.cssText = 'max-width:1200px;margin:0 auto 24px;padding:0 24px;';
   const lbl = document.createElement('div');
-  lbl.className = 'er-between-ad-label';
+  lbl.style.cssText = 'font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1.5px;color:#bbb;text-align:center;margin-bottom:6px;';
   lbl.textContent = 'Sponsored';
   wrap.appendChild(lbl);
   const inner = document.createElement('div');
-  inner.innerHTML = adCode;
+  inner.innerHTML = code;
   wrap.appendChild(inner);
-  activateAdScripts(inner);
-  targetSection.insertAdjacentElement('afterend', wrap);
+  inner.querySelectorAll('script').forEach(old => {
+    const s = document.createElement('script');
+    Array.from(old.attributes).forEach(a => s.setAttribute(a.name, a.value));
+    s.textContent = old.textContent;
+    old.parentNode.replaceChild(s, old);
+  });
+  target.insertAdjacentElement('afterend', wrap);
 }
 
-/* ─── Auto-inject on all non-admin, non-legal pages ─── */
+// ─── Main insertSmartAds — called once on every public page ─────────────────
 function insertSmartAds() {
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  if (['privacy.html', 'terms.html', 'disclaimer.html', 'admin.html'].includes(currentPage)) return;
-  if (document.body?.dataset?.smartAdsApplied === '1') return;
-  document.body.dataset.smartAdsApplied = '1';
+  if (['privacy.html','terms.html','disclaimer.html','admin.html'].includes(currentPage)) return;
+  if (document.body?.dataset?.erSmartAds === '1') return;
+  document.body.dataset.erSmartAds = '1';
 
-  ensureSmartAdStyles();
-  const adSlots = getAdSlots();
-  const hasCustomAds = !!document.querySelector('.ad-slot');
+  const slots = getAdSlots();
   const main   = document.querySelector('main');
   const footer = document.querySelector('footer');
   const hero   = document.querySelector('.page-hero, .hero');
-  const contentChildren = main
-    ? Array.from(main.children)
-    : Array.from(document.body.children).filter(n => !n.matches('header,footer,script,.page-hero,.hero,.er-ad-shell'));
 
-  // 1. TOP — after hero, before content
-  if (!hasCustomAds && !document.querySelector('[data-auto-ad="top"]')) {
-    const el = buildAdSlotElement('top', adSlots.top || {});
-    if (el) {
-      if (hero?.parentNode) hero.insertAdjacentElement('afterend', el);
-      else if (main) main.insertAdjacentElement('afterbegin', el);
-    }
+  // 1. TOP BANNER — after hero, before content
+  // Use 'top' key; ads.js handles 'top_banner' independently
+  const topEl = _buildAdElement(slots, 'top', 'er-ad-shell er-ad-shell--top');
+  if (topEl) {
+    if (hero?.parentNode) hero.insertAdjacentElement('afterend', topEl);
+    else if (main) main.insertAdjacentElement('afterbegin', topEl);
   }
 
-  // 2. INLINE / MID — between content sections
-  if (!hasCustomAds && !document.querySelector('[data-auto-ad="inline"]')) {
-    const el = buildAdSlotElement('inline', { ...(adSlots.inline || {}), compact: true });
-    if (el && contentChildren.length > 1) {
-      const anchor = contentChildren[Math.min(1, contentChildren.length - 1)];
-      anchor.insertAdjacentElement('beforebegin', el);
-    }
+  // 2. INLINE MID — between content sections (use 'inline' key; ads.js handles inline_1/2/3)
+  const inlineEl = _buildAdElement(slots, 'inline', 'er-ad-shell er-ad-shell--inline');
+  if (inlineEl && main) {
+    const kids = Array.from(main.children).filter(el => !el.dataset.erAdSlot && !el.matches('script,style'));
+    const anchor = kids[Math.min(1, kids.length - 1)];
+    if (anchor) anchor.insertAdjacentElement('beforebegin', inlineEl);
   }
 
-  // 3. BETWEEN SECTIONS — after 2nd .class-section block (listing pages)
-  if (adSlots.between?.enabled !== false) {
-    // Run slightly deferred so dynamic content has rendered
-    setTimeout(() => injectBetweenSectionsAd(adSlots.between || {}), 120);
+  // 3. BETWEEN SECTIONS — injected after a delay to allow dynamic content
+  if (_slotEnabled(slots, 'between') || _slotEnabled(slots, 'between_sections')) {
+    setTimeout(() => _injectBetweenSections(slots), 200);
   }
 
-  // 4. PRE-FOOTER — above footer
-  if (footer && !document.querySelector('[data-auto-ad="footer"]')) {
-    const el = buildAdSlotElement('footer', { ...(adSlots.footer || {}), compact: true });
-    if (el) footer.insertAdjacentElement('beforebegin', el);
-  }
+  // 4. PRE-FOOTER — above footer (use 'footer' key; ads.js handles 'pre_footer')
+  const footerEl = _buildAdElement(slots, 'footer', 'er-ad-shell er-ad-shell--footer');
+  if (footerEl && footer) footer.insertAdjacentElement('beforebegin', footerEl);
 
-  // 5. STICKY SIDEBAR — desktop only, appears after scroll
-  if (adSlots.sticky?.enabled !== false) {
-    injectStickySidebarAd(adSlots.sticky || {});
-  }
+  // 5. STICKY SIDEBAR — desktop only (deferred so page layout is settled)
+  setTimeout(() => _injectStickySidebar(slots), 500);
 
-  // 6. MOBILE STICKY BOTTOM — mobile only, slides up after 3s
-  if (adSlots.mobile_bottom?.enabled !== false) {
-    injectMobileBottomAd(adSlots.mobile_bottom || {});
-  }
+  // 6. MOBILE STICKY BOTTOM — mobile only
+  _injectMobileBottom(slots);
 }
 
 // Auto-apply on DOMContentLoaded for all non-admin pages
@@ -1060,4 +992,3 @@ function getChapterLabel(cls, subjectKey, chapterId) {
   const ch = getChapters(cls, subjectKey).find(c => c.id === chapterId);
   return ch ? `Ch ${ch.number}: ${ch.name}` : 'Uncategorized';
 }
-
