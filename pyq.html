@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https: data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' https: data: blob:; font-src 'self' https://fonts.gstatic.com data:; frame-src 'self' https: data: blob:; connect-src 'self' https: data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>PYQ Papers – ExamReady</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -150,6 +152,10 @@
         <button class="filter-btn" onclick="setFilter('class','12',this)">Class 12</button>
       </div>
     </div>
+    <div class="filter-group">
+      <div class="filter-group-label">Filter by Year</div>
+      <div class="filter-pills" id="yearFilters"></div>
+    </div>
   </div>
 
   <div id="pyqContent"></div>
@@ -188,14 +194,53 @@
 
 <script src="shared.js"></script>
 <script src="animations.js"></script>
+<script src="ads.js"></script>
 <script>
 let filters = { class: 'all' };
+let yearFilter = 'all';
 
 function setFilter(type, val, btn) {
   filters[type] = val;
   btn.closest('.filter-pills').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   renderPYQs();
+}
+
+function buildYearFilters() {
+  const allPdfs = getData('pdfs') || {};
+  const years = new Set();
+  getClassCatalog().forEach(cls =>
+    cls.subjects.forEach(sub => {
+      (allPdfs[`${cls.cls}-${sub.key}-pyq`] || []).forEach(p => {
+        if (p.year) years.add(String(p.year));
+      });
+    })
+  );
+
+  const sorted = [...years].sort((a, b) => {
+    const diff = Number(b) - Number(a);
+    return Number.isNaN(diff) ? String(b).localeCompare(String(a)) : diff;
+  });
+  const container = document.getElementById('yearFilters');
+  if (!container) return;
+  if (yearFilter !== 'all' && !sorted.includes(String(yearFilter))) yearFilter = 'all';
+  container.innerHTML = '';
+
+  const appendBtn = (label, value) => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (String(yearFilter) === String(value) ? ' active' : '');
+    btn.textContent = label;
+    btn.onclick = function() {
+      container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      yearFilter = value;
+      renderPYQs();
+    };
+    container.appendChild(btn);
+  };
+
+  appendBtn('All Years', 'all');
+  sorted.forEach(year => appendBtn(year, year));
 }
 
 function renderPYQs() {
@@ -210,7 +255,8 @@ function renderPYQs() {
     let subjectsHtml = '';
     classData.subjects.forEach(sub => {
       const key = classData.cls + '-' + sub.key + '-pyq';
-      const pyqs = allPdfs[key] || [];
+      let pyqs = allPdfs[key] || [];
+      if (yearFilter !== 'all') pyqs = pyqs.filter(p => String(p.year) === String(yearFilter));
       total += pyqs.length;
       let listHtml = '';
       if (pyqs.length === 0) {
@@ -267,6 +313,7 @@ function toggleMenu() {
   }
 }
 
+buildYearFilters();
 renderPYQs();
 </script>
 </body>

@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https: data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' https: data: blob:; font-src 'self' https://fonts.gstatic.com data:; frame-src 'self' https: data: blob:; connect-src 'self' https: data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Question Banks – ExamReady</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -41,7 +43,8 @@
 
   main { flex:1; max-width:1200px; margin:0 auto; padding:52px 24px; width:100%; }
 
-  .filter-bar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:40px; align-items:center; }
+  .filter-wrap { display:flex; flex-direction:column; gap:12px; margin-bottom:40px; }
+  .filter-bar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
   .filter-label { font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:1px; color:var(--muted); }
   .filter-btn { padding:8px 20px; border-radius:30px; border:2px solid var(--gray2); background:#fff; font-weight:800; font-size:13px; cursor:pointer; transition:.2s; color:var(--text); }
   .filter-btn.active, .filter-btn:hover { background:var(--red); border-color:var(--red); color:#fff; }
@@ -131,13 +134,19 @@
 </div>
 
 <main>
-  <div class="filter-bar">
-    <span class="filter-label">Filter:</span>
-    <button class="filter-btn active" onclick="filterClass(this,'all')">All Classes</button>
-    <button class="filter-btn" onclick="filterClass(this,'9')">Class 9</button>
-    <button class="filter-btn" onclick="filterClass(this,'10')">Class 10</button>
-    <button class="filter-btn" onclick="filterClass(this,'11')">Class 11</button>
-    <button class="filter-btn" onclick="filterClass(this,'12')">Class 12</button>
+  <div class="filter-wrap">
+    <div class="filter-bar" id="classFilters">
+      <span class="filter-label">Class:</span>
+      <button class="filter-btn active" onclick="filterClass(this,'all')">All Classes</button>
+      <button class="filter-btn" onclick="filterClass(this,'9')">Class 9</button>
+      <button class="filter-btn" onclick="filterClass(this,'10')">Class 10</button>
+      <button class="filter-btn" onclick="filterClass(this,'11')">Class 11</button>
+      <button class="filter-btn" onclick="filterClass(this,'12')">Class 12</button>
+    </div>
+    <div class="filter-bar">
+      <span class="filter-label">Year:</span>
+      <div style="display:flex;gap:10px;flex-wrap:wrap" id="yearFilters"></div>
+    </div>
   </div>
   <div id="qbContent"></div>
 </main>
@@ -175,14 +184,53 @@
 
 <script src="shared.js"></script>
 <script src="animations.js"></script>
+<script src="ads.js"></script>
 <script>
 let activeClass = 'all';
+let activeYear = 'all';
 
 function filterClass(btn, cls) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.closest('.filter-bar').querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   activeClass = cls;
   renderQBs();
+}
+
+function buildYearFilters() {
+  const allPdfs = getData('pdfs') || {};
+  const years = new Set();
+  getClassCatalog().forEach(cls =>
+    cls.subjects.forEach(sub => {
+      (allPdfs[`${cls.cls}-${sub.key}-qb`] || []).forEach(p => {
+        if (p.year) years.add(String(p.year));
+      });
+    })
+  );
+
+  const sorted = [...years].sort((a, b) => {
+    const diff = Number(b) - Number(a);
+    return Number.isNaN(diff) ? String(b).localeCompare(String(a)) : diff;
+  });
+  const container = document.getElementById('yearFilters');
+  if (!container) return;
+  if (activeYear !== 'all' && !sorted.includes(String(activeYear))) activeYear = 'all';
+  container.innerHTML = '';
+
+  const appendBtn = (label, value) => {
+    const btn = document.createElement('button');
+    btn.className = 'filter-btn' + (String(activeYear) === String(value) ? ' active' : '');
+    btn.textContent = label;
+    btn.onclick = function() {
+      container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      activeYear = value;
+      renderQBs();
+    };
+    container.appendChild(btn);
+  };
+
+  appendBtn('All Years', 'all');
+  sorted.forEach(year => appendBtn(year, year));
 }
 
 function renderQBs() {
@@ -195,7 +243,8 @@ function renderQBs() {
   toShow.forEach(classData => {
     const cards = classData.subjects.map(sub => {
       const key = classData.cls + '-' + sub.key + '-qb';
-      const qbs = allPdfs[key] || [];
+      let qbs = allPdfs[key] || [];
+      if (activeYear !== 'all') qbs = qbs.filter(q => String(q.year) === String(activeYear));
       if (qbs.length === 0) {
         return `
           <div class="qb-card">
@@ -257,6 +306,7 @@ function toggleMenu() {
   }
 }
 
+buildYearFilters();
 renderQBs();
 </script>
 </body>

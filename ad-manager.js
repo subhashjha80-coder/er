@@ -48,7 +48,7 @@
           size: 'Responsive',
           system: 'ads.js',
           priority: 'high',
-          tip: 'Duplicate of the above slot for the ads.js auto-inject system. Paste the same AdSense code.',
+          tip: 'Mirrored ads.js placement. Admin keeps this placement pair in sync automatically.',
         },
         {
           key: 'footer',
@@ -160,7 +160,7 @@
           size: 'Responsive',
           system: 'ads.js',
           priority: 'veryhigh',
-          tip: 'Same high-intent placement from ads.js system. Use same ad code.',
+          tip: 'Mirrored high-intent placement kept in sync automatically from admin.',
         },
         {
           key: 'solution_mid',
@@ -181,6 +181,16 @@
           system: 'ads.js',
           priority: 'high',
           tip: 'Shown while student is actively taking a quiz.',
+        },
+        {
+          key: 'pdf_viewer',
+          label: 'PDF Viewer Banner',
+          where: 'Between the PDF toolbar and viewer',
+          pages: 'pdf-viewer.html',
+          size: 'Responsive',
+          system: 'shared.js',
+          priority: 'high',
+          tip: 'Dedicated monetisation slot for PDF previews without breaking the viewer layout.',
         },
       ],
     },
@@ -206,7 +216,7 @@
           size: '160×600 skyscraper',
           system: 'ads.js',
           priority: 'veryhigh',
-          tip: 'Same slot for ads.js system. Paste same code.',
+          tip: 'Mirrored sticky placement kept in sync automatically from admin.',
         },
         {
           key: 'mobile_bottom',
@@ -224,23 +234,54 @@
 
   /* ── All slot keys (flat) ── */
   const ALL_SLOTS = SLOT_GROUPS.flatMap(g => g.slots);
+  const SLOT_LINKS = [
+    ['top', 'top_banner'],
+    ['footer', 'pre_footer'],
+    ['between', 'between_sections'],
+    ['sticky', 'sidebar_sticky'],
+  ];
 
   /* ================================================================
      STORAGE HELPERS
      ================================================================ */
+  function normalizeSlots(input) {
+    const raw = (input && typeof input === 'object' && !Array.isArray(input)) ? input : {};
+    const out = {};
+    ALL_SLOTS.forEach(s => {
+      out[s.key] = { enabled: true, adCode: '', ...(raw[s.key] || {}) };
+    });
+    Object.keys(raw).forEach(key => {
+      if (!out[key]) out[key] = { enabled: true, adCode: '', ...(raw[key] || {}) };
+    });
+    SLOT_LINKS.forEach(([primaryKey, aliasKey]) => {
+      const primary = out[primaryKey] || { enabled: true, adCode: '' };
+      const alias = out[aliasKey] || { enabled: true, adCode: '' };
+      const primaryCode = (primary.adCode || '').trim();
+      const aliasCode = (alias.adCode || '').trim();
+      const source = primaryCode
+        ? primary
+        : aliasCode
+        ? alias
+        : (primary.enabled === false && alias.enabled !== false ? alias : primary);
+      const synced = {
+        enabled: source.enabled !== false,
+        adCode: source.adCode || '',
+      };
+      out[primaryKey] = { ...(out[primaryKey] || {}), ...synced };
+      out[aliasKey] = { ...(out[aliasKey] || {}), ...synced };
+    });
+    return out;
+  }
+
   function loadSlots() {
     try {
       const saved = JSON.parse(localStorage.getItem('er_ad_slots') || '{}');
-      const out = {};
-      ALL_SLOTS.forEach(s => {
-        out[s.key] = { enabled: true, adCode: '', ...( saved[s.key] || {}) };
-      });
-      return out;
-    } catch (e) { return {}; }
+      return normalizeSlots(saved);
+    } catch (e) { return normalizeSlots({}); }
   }
 
   function persistSlots(slots) {
-    localStorage.setItem('er_ad_slots', JSON.stringify(slots));
+    localStorage.setItem('er_ad_slots', JSON.stringify(normalizeSlots(slots)));
   }
 
   /* ================================================================
@@ -303,10 +344,10 @@
           </span>
           ${codedCount === 0
             ? `<span style="font-size:11px;font-weight:800;color:#ffdd88;background:rgba(255,200,0,.12);padding:4px 12px;border-radius:20px;border:1px solid rgba(255,200,0,.25)">
-                ⚠ Showing native placeholders — paste AdSense code to go live
+                ⚠ No AdSense code live yet - empty slots stay hidden
                </span>`
             : `<span style="font-size:11px;font-weight:800;color:#7fff9a;background:rgba(100,255,100,.1);padding:4px 12px;border-radius:20px;border:1px solid rgba(100,255,100,.2)">
-                ✅ Real ads active on ${codedCount} slot${codedCount !== 1 ? 's' : ''}
+                ✅ Live AdSense code active on ${codedCount} slot${codedCount !== 1 ? 's' : ''}
                </span>`}
         </div>`;
     }
@@ -378,7 +419,7 @@
           <label style="display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:5px">
             <span>Ad Code</span>
             <span style="color:${hasCode ? 'var(--green)' : 'var(--muted)'}">
-              ${hasCode ? `✓ ${adCode.trim().length} chars — has live code` : 'Empty — showing native placeholder'}
+              ${hasCode ? `✓ ${adCode.trim().length} chars — live AdSense code set` : 'Empty - slot stays hidden'}
             </span>
           </label>
           <textarea id="adcode-${esc(key)}" rows="3"
@@ -418,11 +459,11 @@
     },
 
     clearSlot(key) {
-      if (!confirm(`Clear ad code for "${key}"?\nThe slot will show a styled native placeholder.`)) return;
+      if (!confirm(`Clear ad code for "${key}"?\nThis placement will stay hidden until new AdSense code is saved.`)) return;
       const slots = loadSlots();
       if (slots[key]) { slots[key].adCode = ''; slots[key].enabled = true; }
       persistSlots(slots);
-      toast('Slot cleared — showing native placeholder.', 'warn');
+      toast('Slot cleared.', 'warn');
       renderAdManager();
     },
 
@@ -460,7 +501,7 @@
     },
 
     clearAll() {
-      if (!confirm('Clear ALL ad code from every slot?\nAll slots will revert to styled native placeholders.')) return;
+      if (!confirm('Clear ALL ad code from every slot?\nAll placements without code will stay hidden.')) return;
       const slots = loadSlots();
       ALL_SLOTS.forEach(s => { if (slots[s.key]) slots[s.key].adCode = ''; });
       persistSlots(slots);
@@ -506,7 +547,7 @@
   function buildSectionHTML() {
     return `
       <div class="page-title">💰 Ad Manager</div>
-      <div class="page-subtitle">Control every ad placement across the entire site. Changes save to localStorage and take effect on all public pages immediately.</div>
+      <div class="page-subtitle">Control every AdSense placement across the entire site. Paste your AdSense code here and admin controls it site-wide. Empty slots stay hidden until code is added.</div>
 
       <!-- Stats bar -->
       <div id="adStatsBar" style="background:linear-gradient(135deg,#0d0d0d,#1a0505);border-radius:14px;padding:16px 22px;margin-bottom:20px;color:#fff;position:relative;overflow:hidden">
@@ -531,11 +572,11 @@
       <div style="background:#f0f4ff;border:1px solid #c5d5ff;border-radius:12px;padding:14px 18px;margin-bottom:20px;font-size:13px;line-height:1.8;color:#1a2a6a;font-weight:600">
         <strong>How it works:</strong>
         Each slot below maps to a placement on the live site.
-        Paste your AdSense <code style="background:rgba(0,0,0,.07);padding:1px 6px;border-radius:4px">&lt;script&gt;</code> or
+        Paste your AdSense <code style="background:rgba(0,0,0,.07);padding:1px 6px;border-radius:4px">&lt;script&gt;</code> and
         <code style="background:rgba(0,0,0,.07);padding:1px 6px;border-radius:4px">&lt;ins&gt;</code>
         code into the slot, click <strong>Save Slot</strong>, and it goes live immediately.
-        Slots with no code show styled native placeholder ads so the site always looks polished.
-        Slots marked <strong>ads.js</strong> and <strong>shared.js</strong> both read from the same storage key — you can paste the same AdSense code into both.
+        Slots with no code stay empty, so only the AdSense ads you add from admin are shown.
+        Mirrored <strong>ads.js</strong> and <strong>shared.js</strong> placements are synced automatically from admin.
       </div>
 
       <!-- Slot groups -->

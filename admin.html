@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https: data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' https: data: blob:; font-src 'self' https://fonts.gstatic.com data:; frame-src 'self' https: data: blob:; connect-src 'self' https: data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Admin Panel – ExamReady</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -365,7 +367,7 @@
     <!-- ===== DASHBOARD ===== -->
     <div class="admin-section active" id="sec-dashboard">
       <div class="page-title">Welcome back 👋</div>
-      <div class="page-subtitle">Here's a live overview of your ExamReady content and admin health.</div>
+      <div class="page-subtitle">See site stats, content health, and recent activity in one place.</div>
       <div class="dashboard-hero">
         <div>
           <div class="dashboard-kicker">Admin Command Center</div>
@@ -412,7 +414,7 @@
     <!-- ===== ALL PDFs ===== -->
     <div class="admin-section" id="sec-pdfs">
       <div class="page-title">📄 PDFs &amp; Papers</div>
-      <div class="page-subtitle">Manage PYQs, question banks, SPQs, institutional papers, short notes, and all study files.</div>
+      <div class="page-subtitle">Browse, filter, edit, and delete uploaded PDFs and paper links.</div>
       <div class="filter-bar">
         <select class="filter-select" id="pdfClassFilter" onchange="renderPDFTable()"><option value="">All Classes</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
         <select class="filter-select" id="pdfTypeFilter" onchange="renderPDFTable()"><option value="">All Types</option><option value="pyq">PYQ Papers</option><option value="qb">Question Banks</option><option value="spq">SPQ Papers</option><option value="ip">Institutional Papers</option><option value="notes">Short Notes</option></select>
@@ -431,7 +433,7 @@
     <!-- ===== UPLOAD PDF ===== -->
     <div class="admin-section" id="sec-upload-pdf">
       <div class="page-title">⬆ Upload PDF / File</div>
-      <div class="page-subtitle">Add a new PYQ paper, question bank, SPQ, institutional paper, short notes file, or any study material.</div>
+      <div class="page-subtitle">Add a new PDF, Drive link, or uploaded file to the site library.</div>
       <div class="form-card">
         <div class="table-header"><h3>📎 File Details</h3></div>
         <div class="form-body">
@@ -471,7 +473,7 @@
     <!-- ===== ALL QUIZZES ===== -->
     <div class="admin-section" id="sec-quizzes">
       <div class="page-title">🎯 All Quizzes</div>
-      <div class="page-subtitle">Manage quizzes across all classes and subjects.</div>
+      <div class="page-subtitle">Manage every quiz, search by class or subject, and keep practice content organized.</div>
       <div class="filter-bar">
         <select class="filter-select" id="quizClassFilter" onchange="populateQuizSubjectFilter(); renderQuizTable()"><option value="">All Classes</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select>
         <select class="filter-select" id="quizSubjFilter" onchange="renderQuizTable()"><option value="">All Subjects</option></select>
@@ -488,7 +490,7 @@
     <!-- ===== CREATE/EDIT QUIZ ===== -->
     <div class="admin-section" id="sec-create-quiz">
       <div class="page-title" id="quizFormTitle">➕ Create New Quiz</div>
-      <div class="page-subtitle">Build a quiz and assign it to a class and subject.</div>
+      <div class="page-subtitle">Create or edit quiz sets, questions, and answer keys.</div>
       <div class="form-card" style="max-width:720px">
         <div class="table-header"><h3 id="quizFormSubtitle">Quiz Builder</h3></div>
         <div class="form-body">
@@ -515,7 +517,7 @@
     <!-- ===== SUBJECTS MANAGER ===== -->
     <div class="admin-section" id="sec-subjects">
       <div class="page-title">📚 Subjects Manager</div>
-      <div class="page-subtitle">Add, edit, or remove subjects for each class.</div>
+      <div class="page-subtitle">Organize subjects by class and control how they appear on the public site.</div>
       <div class="page-editor-tabs" id="subjectClassTabs">
         <button class="tab-btn active" onclick="switchSubjectClass('9',this)">Class 9</button>
         <button class="tab-btn" onclick="switchSubjectClass('10',this)">Class 10</button>
@@ -529,7 +531,7 @@
     <!-- ===== CHAPTERS MANAGER ===== -->
     <div class="admin-section" id="sec-chapters">
       <div class="page-title">📖 Chapters Manager</div>
-      <div class="page-subtitle">Create and manage chapters for any subject.</div>
+      <div class="page-subtitle">Create and manage chapter lists used across PDFs, quizzes, and solutions.</div>
       <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;align-items:flex-end">
         <div class="form-group" style="margin-bottom:0;min-width:120px"><label>Class</label><select id="chapterClassSel" class="filter-select" onchange="onChapterClassChange()"><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select></div>
         <div class="form-group" style="margin-bottom:0;min-width:200px"><label>Subject</label><select id="chapterSubjectSel" class="filter-select" onchange="onChapterSubjectChange()"></select></div>
@@ -541,7 +543,7 @@
     <!-- ===== NEW SUBJECT PAGE ===== -->
     <div class="admin-section" id="sec-new-subject">
       <div class="page-title">✨ Create New Subject Page</div>
-      <div class="page-subtitle">Create a dedicated page for a custom subject or topic.</div>
+      <div class="page-subtitle">Add a subject page with its own label, icon, and description.</div>
       <div class="form-card">
         <div class="table-header"><h3>Subject Page Details</h3></div>
         <div class="form-body">
@@ -565,7 +567,7 @@
     <!-- ===== SITE EDITOR ===== -->
     <div class="admin-section" id="sec-site-editor">
       <div class="page-title">🎨 Site Editor</div>
-      <div class="page-subtitle">Edit the homepage hero, stats, and site-wide content.</div>
+      <div class="page-subtitle">Update hero content, site branding, and homepage settings.</div>
       <div class="page-editor-tabs">
         <button class="tab-btn active" onclick="switchEditorTab('hero',this)">Hero Section</button>
         <button class="tab-btn" onclick="switchEditorTab('stats',this)">Stats</button>
@@ -608,7 +610,7 @@
     <!-- ===== NAVIGATION EDITOR ===== -->
     <div class="admin-section" id="sec-nav-editor">
       <div class="page-title">🔗 Navigation Editor</div>
-      <div class="page-subtitle">Edit the main navigation menu links and their order.</div>
+      <div class="page-subtitle">Manage header navigation links shown across the site.</div>
       <div class="form-card" style="max-width:700px">
         <div class="table-header"><h3>Navigation Links</h3><button class="btn btn-red" onclick="addNavItem()">+ Add Link</button></div>
         <div class="form-body">
@@ -624,7 +626,7 @@
     <!-- ===== ANNOUNCEMENTS ===== -->
     <div class="admin-section" id="sec-announcements">
       <div class="page-title">📢 Announcements</div>
-      <div class="page-subtitle">Show a banner message on the site for students.</div>
+      <div class="page-subtitle">Create the announcement bar message and optional destination link.</div>
       <div class="form-card">
         <div class="table-header"><h3>📢 Site Announcement</h3></div>
         <div class="form-body">
@@ -643,7 +645,7 @@
     <!-- ===== SETTINGS ===== -->
     <div class="admin-section" id="sec-settings">
       <div class="page-title">⚙ Settings</div>
-      <div class="page-subtitle">Configure admin panel and site preferences.</div>
+      <div class="page-subtitle">Manage admin access, exports, and core site configuration.</div>
       <div class="settings-grid">
         <div class="settings-card">
           <h4>🔐 Change Admin Password</h4>
@@ -682,7 +684,7 @@
     <!-- ===== AD MANAGER ===== -->
     <div class="admin-section" id="sec-ads">
       <div class="page-title">💰 Ad Manager</div>
-      <div class="page-subtitle">Control every ad placement across the entire site. Paste your AdSense or any network code into each slot — changes take effect on all public pages immediately.</div>
+      <div class="page-subtitle">Control every AdSense placement across the entire site. Paste your AdSense code here and admin controls it site-wide. Empty slots stay hidden until code is added.</div>
 
       <!-- Stats bar -->
       <div class="ad-stats-bar">
@@ -703,13 +705,7 @@
       </div>
 
       <!-- Info banner -->
-      <div class="ad-howto">
-        <strong>How it works:</strong> Every slot below maps to a real placement on your live site.
-        Paste your Google AdSense <code style="background:rgba(0,0,0,.07);padding:1px 6px;border-radius:4px">&lt;script&gt;</code> or
-        <code style="background:rgba(0,0,0,.07);padding:1px 6px;border-radius:4px">&lt;ins&gt;</code> code, click <strong>Save Slot</strong>, and it goes live instantly.
-        Slots with no code show styled native placeholder ads so the site always looks polished.
-        <br><strong style="color:#e8211a">Quick tip:</strong> Paste AdSense Auto Ads global tag into <em>Top Banner</em> and Google automatically handles all placements.
-      </div>
+      <div class="ad-howto"><strong>How it works:</strong> Every slot below maps to a real placement on your live site. Paste your Google AdSense <code style="background:rgba(0,0,0,.07);padding:1px 6px;border-radius:4px">&lt;script&gt;</code> and <code style="background:rgba(0,0,0,.07);padding:1px 6px;border-radius:4px">&lt;ins&gt;</code> code, click <strong>Save Slot</strong>, and it goes live instantly. Slots with no code stay empty, so only the AdSense ads you add from admin are shown.<br><strong style="color:#e8211a">Quick tip:</strong> Mirrored shared.js and ads.js placements are synced automatically from this admin panel.</div>
 
       <!-- Slot groups rendered here -->
       <div id="adSlotsContainer">
@@ -724,7 +720,7 @@
             <div class="ad-guide-card"><strong>1. Create an ad unit</strong>Go to <em>AdSense → Ads → By ad unit → Display ad</em>. Set size to <strong>Responsive</strong> for best results across all screen sizes.</div>
             <div class="ad-guide-card"><strong>2. Copy the snippet</strong>Copy the full <code style="background:#f0f0f0;padding:1px 5px;border-radius:3px">&lt;script&gt;…&lt;/script&gt;</code> code that Google provides after creating your ad unit.</div>
             <div class="ad-guide-card"><strong>3. Paste and save</strong>Paste into the matching slot on this page, then click <strong>Save Slot</strong>. Changes are live on all pages immediately — no file edits needed.</div>
-            <div class="ad-guide-card" style="background:#fff8f8;border-color:#ffd0ce"><strong style="color:var(--red)">💡 Pro tip — slot pairing</strong>shared.js and ads.js slots with the same placement use different keys but the same storage. Paste the same ad code into both paired slots for full coverage.</div>
+            <div class="ad-guide-card" style="background:#fff8f8;border-color:#ffd0ce"><strong style="color:var(--red)">Pro tip - synced pairs</strong>Mirrored shared.js and ads.js placements are synced automatically here, so you manage one AdSense setup from admin.</div>
           </div>
         </div>
       </div>
@@ -791,42 +787,235 @@ function safeHtml(v) {
   return String(v==null?'':v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
+function safeNavUrl(value, fallback='') {
+  return typeof sanitizeNavigationUrl === 'function' ? sanitizeNavigationUrl(value, fallback) : String(value || '').trim();
+}
+
+function safeAnnouncementLink(value, fallback='') {
+  return typeof sanitizeAnnouncementUrl === 'function' ? sanitizeAnnouncementUrl(value, fallback) : String(value || '').trim();
+}
+
+function safeStoredResourceUrl(value, fallback='') {
+  return typeof sanitizeResourceUrl === 'function' ? sanitizeResourceUrl(value, fallback) : String(value || '').trim();
+}
+
+function safeThemeColor(value, fallback='#e8211a') {
+  return typeof sanitizeCssColor === 'function' ? sanitizeCssColor(value, fallback) : (String(value || '').trim() || fallback);
+}
+
+function safeImageAsset(value, fallback='') {
+  return typeof sanitizeImageAssetUrl === 'function' ? sanitizeImageAssetUrl(value, fallback) : String(value || '').trim();
+}
+
 // ============================================================
 // AUTH
 // ============================================================
-let ADMIN_PASS = localStorage.getItem('er_admin_pass') || 'ExamReady@Admin25';
-const MAX_ATTEMPTS = 5; const LOCKOUT_SECONDS = 30;
-let failCount = 0; let lockedUntil = 0;
+const DEFAULT_ADMIN_PASSWORD = 'ExamReady@Admin25';
+const ADMIN_HASH_KEY = 'er_admin_pass_hash';
+const LEGACY_ADMIN_PASS_KEY = 'er_admin_pass';
+const ADMIN_SESSION_KEY = 'er_admin_auth';
+const ADMIN_SESSION_EXP_KEY = 'er_admin_auth_exp';
+const ADMIN_FAIL_KEY = 'er_admin_fail_count';
+const ADMIN_LOCKOUT_KEY = 'er_admin_lockout_until';
+const ADMIN_HASH_SALT = 'examready-admin-v1';
+const ADMIN_HASH_ITERATIONS = 150000;
+const ADMIN_SESSION_TTL_MS = 30 * 60 * 1000;
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_SECONDS = 30;
+let adminHashReady = null;
+let lockoutTimer = null;
 
-function doLogin() {
-  const now = Date.now();
-  if (now < lockedUntil) { showLockoutBar('🔒 Try again in ' + Math.ceil((lockedUntil-now)/1000) + 's.'); return; }
-  const val = document.getElementById('authPass').value;
-  const input = document.getElementById('authPass');
-  if (val === ADMIN_PASS) {
-    failCount = 0; sessionStorage.setItem('er_admin_auth','1');
-    document.getElementById('authGate').style.display = 'none'; initAdmin();
-  } else {
-    failCount++;
-    document.getElementById('authError').style.display = 'block';
-    input.classList.add('error'); setTimeout(() => input.classList.remove('error'), 400); input.value = '';
-    if (failCount >= MAX_ATTEMPTS) {
-      lockedUntil = Date.now() + LOCKOUT_SECONDS * 1000;
-      document.getElementById('authSubmitBtn').disabled = true;
-      showLockoutBar('🔒 Locked for ' + LOCKOUT_SECONDS + 's.'); startLockoutCountdown();
-    } else { document.getElementById('attemptsNote').textContent = '⚠ ' + failCount + ' failed. ' + (MAX_ATTEMPTS-failCount) + ' remaining.'; }
+function getAuthButton() { return document.getElementById('authSubmitBtn'); }
+function getLockoutUntil() { return Math.max(0, parseInt(localStorage.getItem(ADMIN_LOCKOUT_KEY) || '0', 10) || 0); }
+function setLockoutUntil(value) { value > 0 ? localStorage.setItem(ADMIN_LOCKOUT_KEY, String(value)) : localStorage.removeItem(ADMIN_LOCKOUT_KEY); }
+function getFailCount() { return Math.max(0, parseInt(localStorage.getItem(ADMIN_FAIL_KEY) || '0', 10) || 0); }
+function setFailCount(value) { value > 0 ? localStorage.setItem(ADMIN_FAIL_KEY, String(value)) : localStorage.removeItem(ADMIN_FAIL_KEY); }
+
+function bytesToHex(buffer) {
+  return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function deriveAdminPasswordHash(password) {
+  if (!window.crypto?.subtle) throw new Error('Secure hashing is not available in this browser.');
+  const enc = new TextEncoder();
+  const key = await window.crypto.subtle.importKey('raw', enc.encode(String(password)), { name: 'PBKDF2' }, false, ['deriveBits']);
+  const bits = await window.crypto.subtle.deriveBits({
+    name: 'PBKDF2',
+    salt: enc.encode(ADMIN_HASH_SALT),
+    iterations: ADMIN_HASH_ITERATIONS,
+    hash: 'SHA-256'
+  }, key, 256);
+  return bytesToHex(bits);
+}
+
+async function ensureAdminPasswordHash() {
+  if (adminHashReady) return adminHashReady;
+  adminHashReady = (async () => {
+    const storedHash = localStorage.getItem(ADMIN_HASH_KEY);
+    if (/^[a-f0-9]{64}$/i.test(storedHash || '')) {
+      return storedHash.toLowerCase();
+    }
+    const legacyPassword = localStorage.getItem(LEGACY_ADMIN_PASS_KEY) || DEFAULT_ADMIN_PASSWORD;
+    const hash = await deriveAdminPasswordHash(legacyPassword);
+    localStorage.setItem(ADMIN_HASH_KEY, hash);
+    localStorage.removeItem(LEGACY_ADMIN_PASS_KEY);
+    return hash;
+  })();
+  return adminHashReady;
+}
+
+async function verifyAdminPassword(password) {
+  const storedHash = await ensureAdminPasswordHash();
+  return (await deriveAdminPasswordHash(password)) === storedHash;
+}
+
+async function warnIfUsingDefaultAdminPassword() {
+  try {
+    const currentHash = await ensureAdminPasswordHash();
+    const defaultHash = await deriveAdminPasswordHash(DEFAULT_ADMIN_PASSWORD);
+    if (currentHash === defaultHash) {
+      showToast('Change the default admin password in Settings for better security.','warn');
+    }
+  } catch(e) {}
+}
+
+function clearAdminSession() {
+  sessionStorage.removeItem(ADMIN_SESSION_KEY);
+  sessionStorage.removeItem(ADMIN_SESSION_EXP_KEY);
+}
+
+function touchAdminSession() {
+  if (sessionStorage.getItem(ADMIN_SESSION_KEY) === '1') {
+    sessionStorage.setItem(ADMIN_SESSION_EXP_KEY, String(Date.now() + ADMIN_SESSION_TTL_MS));
   }
 }
-function showLockoutBar(msg) { const b = document.getElementById('lockoutBar'); b.textContent = msg; b.style.display = 'block'; }
+
+function startAdminSession() {
+  sessionStorage.setItem(ADMIN_SESSION_KEY, '1');
+  touchAdminSession();
+}
+
+function hasValidAdminSession() {
+  const isAuthed = sessionStorage.getItem(ADMIN_SESSION_KEY) === '1';
+  const expiresAt = parseInt(sessionStorage.getItem(ADMIN_SESSION_EXP_KEY) || '0', 10);
+  if (!isAuthed || !expiresAt || Date.now() > expiresAt) {
+    clearAdminSession();
+    return false;
+  }
+  return true;
+}
+
+function bindAdminSessionRefresh() {
+  if (window.__erAdminSessionRefreshBound) return;
+  window.__erAdminSessionRefreshBound = true;
+  ['click', 'keydown', 'touchstart'].forEach(evt => {
+    document.addEventListener(evt, () => {
+      if (hasValidAdminSession()) touchAdminSession();
+    }, { passive: true, capture: true });
+  });
+}
+
+function showLockoutBar(msg) {
+  const b = document.getElementById('lockoutBar');
+  if (!b) return;
+  b.textContent = msg;
+  b.style.display = 'block';
+}
+
+function resetLockoutUi() {
+  const btn = getAuthButton();
+  if (btn) btn.disabled = false;
+  const bar = document.getElementById('lockoutBar');
+  if (bar) bar.style.display = 'none';
+  const attempts = document.getElementById('attemptsNote');
+  if (attempts) attempts.textContent = '';
+  if (lockoutTimer) {
+    clearInterval(lockoutTimer);
+    lockoutTimer = null;
+  }
+}
+
+function resetAuthFailures() {
+  setFailCount(0);
+  setLockoutUntil(0);
+  document.getElementById('authError').style.display = 'none';
+  resetLockoutUi();
+}
+
+function syncLockoutState() {
+  const lockedUntil = getLockoutUntil();
+  const btn = getAuthButton();
+  const attempts = document.getElementById('attemptsNote');
+  if (Date.now() < lockedUntil) {
+    if (btn) btn.disabled = true;
+    startLockoutCountdown();
+    return true;
+  }
+  resetLockoutUi();
+  const failCount = getFailCount();
+  if (attempts && failCount > 0) {
+    attempts.textContent = '⚠ ' + failCount + ' failed. ' + Math.max(0, MAX_ATTEMPTS - failCount) + ' remaining.';
+  }
+  return false;
+}
+
 function startLockoutCountdown() {
-  const btn = document.getElementById('authSubmitBtn');
-  const interval = setInterval(() => {
-    const r = Math.ceil((lockedUntil - Date.now()) / 1000);
-    if (r <= 0) { clearInterval(interval); btn.disabled = false; document.getElementById('lockoutBar').style.display = 'none'; failCount = 0; }
-    else showLockoutBar('🔒 Locked for ' + r + 's more.');
+  const btn = getAuthButton();
+  if (lockoutTimer) clearInterval(lockoutTimer);
+  lockoutTimer = setInterval(() => {
+    const remaining = Math.ceil((getLockoutUntil() - Date.now()) / 1000);
+    if (remaining <= 0) {
+      clearInterval(lockoutTimer);
+      lockoutTimer = null;
+      resetAuthFailures();
+      if (btn) btn.disabled = false;
+      return;
+    }
+    if (btn) btn.disabled = true;
+    showLockoutBar('🔒 Locked for ' + remaining + 's more.');
   }, 1000);
 }
-function doLogout() { sessionStorage.removeItem('er_admin_auth'); window.location.reload(); }
+
+async function doLogin() {
+  try {
+    await ensureAdminPasswordHash();
+  } catch (error) {
+    showLockoutBar('Secure login is unavailable in this browser.');
+    return;
+  }
+
+  if (syncLockoutState()) {
+    showLockoutBar('🔒 Try again in ' + Math.ceil((getLockoutUntil() - Date.now()) / 1000) + 's.');
+    return;
+  }
+
+  const input = document.getElementById('authPass');
+  const val = input.value;
+  if (await verifyAdminPassword(val)) {
+    resetAuthFailures();
+    startAdminSession();
+    document.getElementById('authGate').style.display = 'none';
+    initAdmin();
+    return;
+  }
+
+  const failCount = getFailCount() + 1;
+  setFailCount(failCount);
+  document.getElementById('authError').style.display = 'block';
+  input.classList.add('error');
+  setTimeout(() => input.classList.remove('error'), 400);
+  input.value = '';
+
+  if (failCount >= MAX_ATTEMPTS) {
+    setLockoutUntil(Date.now() + LOCKOUT_SECONDS * 1000);
+    showLockoutBar('🔒 Locked for ' + LOCKOUT_SECONDS + 's.');
+    startLockoutCountdown();
+  } else {
+    document.getElementById('attemptsNote').textContent = '⚠ ' + failCount + ' failed. ' + (MAX_ATTEMPTS - failCount) + ' remaining.';
+  }
+}
+
+function doLogout() { clearAdminSession(); window.location.reload(); }
 function togglePw() { const i=document.getElementById('authPass'); i.type=i.type==='password'?'text':'password'; }
 
 // ============================================================
@@ -1029,17 +1218,31 @@ function deletePDFFromBtn(btn) { deletePDF(btn.dataset.cls,btn.dataset.subj,btn.
 // ============================================================
 function handleFileSelect(input) {
   const f=input.files[0]; if(!f) return;
+  const safeName=typeof sanitizeStoredFileName==='function' ? sanitizeStoredFileName(f.name) : f.name;
+  const validExt=/\.(pdf|doc|docx)$/i.test(safeName||'');
+  if(!safeName || !validExt){showToast('Only PDF, DOC, and DOCX files are allowed.','error');input.value='';return;}
   const statusEl=document.getElementById('fileSelectStatus'); statusEl.style.display='block';
-  const sizeMB=(f.size/1024/1024).toFixed(2); statusEl.textContent='📎 '+f.name+' ('+sizeMB+' MB)';
-  if(!document.getElementById('pdfName').value) document.getElementById('pdfName').value=f.name.replace(/\.[^/.]+$/,'');
+  const sizeMB=(f.size/1024/1024).toFixed(2); statusEl.textContent='Selected: '+safeName+' ('+sizeMB+' MB)';
+  if(!document.getElementById('pdfName').value) document.getElementById('pdfName').value=safeName.replace(/\.[^/.]+$/,'');
   document.getElementById('pdfSize').value=(f.size/1024/1024).toFixed(1)+' MB';
-  if(f.size<5*1024*1024) { const reader=new FileReader(); reader.onload=e=>{ localStorage.setItem('er_file_'+f.name,e.target.result); document.getElementById('pdfUrl').value='local:'+f.name; statusEl.textContent+=' ✅ Ready!'; }; reader.readAsDataURL(f); }
-  else statusEl.textContent+=' ⚠ File >5MB — paste a Google Drive link instead.';
+  if(f.size<5*1024*1024) {
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const safeData=safeStoredResourceUrl(e.target.result,'');
+      if(!safeData){showToast('This file format is not allowed for local preview.','error');input.value='';statusEl.style.display='none';return;}
+      localStorage.setItem('er_file_'+safeName,safeData);
+      document.getElementById('pdfUrl').value='local:'+safeName;
+      statusEl.textContent+=' - Ready!';
+    };
+    reader.readAsDataURL(f);
+  } else statusEl.textContent+=' - File >5MB, paste a Google Drive link instead.';
 }
 function uploadPDF() {
   const name=document.getElementById('pdfName').value.trim(), cls=document.getElementById('pdfClass').value, subj=document.getElementById('pdfSubject').value, type=document.getElementById('pdfType').value, year=document.getElementById('pdfYear').value.trim(), url=document.getElementById('pdfUrl').value.trim(), size=document.getElementById('pdfSize').value.trim(), chapterId=document.getElementById('pdfChapter')?.value||'';
   if(!name){showToast('Please enter a file name.','error');return;} if(!subj){showToast('Please select a subject.','error');return;} if(!url){showToast('Please enter a URL or upload a file.','error');return;}
-  const key=cls+'-'+subj+'-'+type; const allPDFs=getData('pdfs')||{}; if(!allPDFs[key]) allPDFs[key]=[]; allPDFs[key].push({id:genId(),name,year,url,size,chapterId}); setData('pdfs',allPDFs);
+  const safeUrl=safeStoredResourceUrl(url,'');
+  if(!safeUrl){showToast('This resource URL is not allowed. Use a safe local file or http/https URL.','error');return;}
+  const key=cls+'-'+subj+'-'+type; const allPDFs=getData('pdfs')||{}; if(!allPDFs[key]) allPDFs[key]=[]; allPDFs[key].push({id:genId(),name,year,url:safeUrl,size,chapterId}); setData('pdfs',allPDFs);
   resetPdfForm(); showToast('PDF added successfully!'); showSection('pdfs');
 }
 function resetPdfForm() { ['pdfName','pdfYear','pdfUrl','pdfSize'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';}); const status=document.getElementById('fileSelectStatus');if(status)status.style.display='none'; const fi=document.getElementById('fileInput');if(fi)fi.value=''; const chapSel=document.getElementById('pdfChapter');if(chapSel)chapSel.value=''; }
@@ -1054,7 +1257,13 @@ function closeEditPdfModal() { document.getElementById('editPdfModal').style.dis
 function savePdfEdit() {
   const id=document.getElementById('editPdfId').value, cls=document.getElementById('editPdfClass').value, subj=document.getElementById('editPdfSubj').value, type=document.getElementById('editPdfType').value, key=cls+'-'+subj+'-'+type;
   const allPDFs=getData('pdfs')||{}; const idx=(allPDFs[key]||[]).findIndex(p=>p.id===id);
-  if(idx>-1){ allPDFs[key][idx]={...allPDFs[key][idx],name:document.getElementById('editPdfName').value.trim(),url:document.getElementById('editPdfUrl').value.trim(),year:document.getElementById('editPdfYear').value.trim(),size:document.getElementById('editPdfSize').value.trim()}; if(!allPDFs[key][idx].name){showToast('Name cannot be empty.','error');return;} setData('pdfs',allPDFs); closeEditPdfModal(); renderPDFTable(); showToast('PDF updated!'); }
+  if(idx>-1){
+    const safeUrl=safeStoredResourceUrl(document.getElementById('editPdfUrl').value.trim(),'');
+    if(!safeUrl){showToast('This resource URL is not allowed.','error');return;}
+    allPDFs[key][idx]={...allPDFs[key][idx],name:document.getElementById('editPdfName').value.trim(),url:safeUrl,year:document.getElementById('editPdfYear').value.trim(),size:document.getElementById('editPdfSize').value.trim()};
+    if(!allPDFs[key][idx].name){showToast('Name cannot be empty.','error');return;}
+    setData('pdfs',allPDFs); closeEditPdfModal(); renderPDFTable(); showToast('PDF updated!');
+  }
   else{showToast('Entry not found.','error');closeEditPdfModal();}
 }
 
@@ -1196,47 +1405,98 @@ function switchEditorTab(tab,btn) {
   document.querySelectorAll('.page-editor-tabs .tab-btn').forEach(b=>b.classList.remove('active')); if(btn)btn.classList.add('active');
 }
 function loadSiteEditorValues() {
-  let config={}; try{config=JSON.parse(localStorage.getItem('er_site_config')||'{}');}catch(e){}
+  let config={}; try{config=(typeof getSiteConfig==='function' ? getSiteConfig() : JSON.parse(localStorage.getItem('er_site_config')||'{}'))||{};}catch(e){}
   document.getElementById('siteHeroTitle').value=config.heroTitle||''; document.getElementById('siteHeroSubtitle').value=config.heroSubtitle||''; document.getElementById('heroBtnText').value=config.heroBtnText||''; document.getElementById('heroBtnUrl').value=config.heroBtnUrl||'';
-  document.getElementById('siteName').value=config.siteName||'ExamReady'; document.getElementById('siteTagline').value=config.siteTagline||''; document.getElementById('colorAccent').value=config.colorAccent||'#e8211a'; document.getElementById('colorBg').value=config.colorBg||'#0d0d0d';
-  loadStatEditor(config.stats);
-}
-function loadStatEditor(stats) {
+  const stats=config.stats||[]; document.getElementById('siteName').value=config.siteName||'ExamReady'; document.getElementById('siteTagline').value=config.siteTagline||'Free study resources for Class 9 to 12';
+  document.getElementById('colorAccent').value=config.colorAccent||'#e8211a'; document.getElementById('colorBg').value=config.colorBg||'#0d0d0d';
   const defaults=[{num:'500+',label:'Resources'},{num:'4',label:'Classes'},{num:'10+',label:'Subjects'},{num:'Free',label:'Always'}]; const s=stats||defaults;
-  document.getElementById('statEditorList').innerHTML=s.map(st=>'<div style="display:grid;grid-template-columns:1fr 2fr auto;gap:10px;margin-bottom:10px;align-items:center"><input type="text" value="'+safeHtml(st.num)+'" class="stat-num-input" placeholder="500+"><input type="text" value="'+safeHtml(st.label)+'" class="stat-label-input" placeholder="Resources"><button class="btn btn-danger" style="padding:6px 10px;font-size:11px" onclick="this.closest(\'div\').remove()">✕</button></div>').join('');
+  document.getElementById('statEditorList').innerHTML=s.map(st=>'<div style="display:grid;grid-template-columns:1fr 2fr auto;gap:10px;margin-bottom:10px;align-items:center"><input type="text" value="'+safeHtml(st.num)+'" class="stat-num-input" placeholder="500+"><input type="text" value="'+safeHtml(st.label)+'" class="stat-label-input" placeholder="Resources"><button class="btn btn-danger" style="padding:6px 10px;font-size:11px" onclick="this.closest(&quot;div&quot;).remove()">x</button></div>').join('');
 }
-function addStatRow() { const list=document.getElementById('statEditorList'); const div=document.createElement('div'); div.style.cssText='display:grid;grid-template-columns:1fr 2fr auto;gap:10px;margin-bottom:10px;align-items:center'; div.innerHTML='<input type="text" class="stat-num-input" placeholder="100+"><input type="text" class="stat-label-input" placeholder="Label"><button class="btn btn-danger" style="padding:6px 10px;font-size:11px" onclick="this.closest(\'div\').remove()">✕</button>'; list.appendChild(div); }
-function saveSiteHero() { let config={}; try{config=JSON.parse(localStorage.getItem('er_site_config')||'{}');}catch(e){} config.heroTitle=document.getElementById('siteHeroTitle').value; config.heroSubtitle=document.getElementById('siteHeroSubtitle').value; config.heroBtnText=document.getElementById('heroBtnText').value; config.heroBtnUrl=document.getElementById('heroBtnUrl').value; localStorage.setItem('er_site_config',JSON.stringify(config)); showToast('Hero section saved!'); }
+function addStatRow() { const list=document.getElementById('statEditorList'); const div=document.createElement('div'); div.style.cssText='display:grid;grid-template-columns:1fr 2fr auto;gap:10px;margin-bottom:10px;align-items:center'; div.innerHTML='<input type="text" class="stat-num-input" placeholder="100+"><input type="text" class="stat-label-input" placeholder="Label"><button class="btn btn-danger" style="padding:6px 10px;font-size:11px" onclick="this.closest(&quot;div&quot;).remove()">x</button>'; list.appendChild(div); }
+function saveSiteHero() {
+  let config={}; try{config=JSON.parse(localStorage.getItem('er_site_config')||'{}');}catch(e){}
+  const rawBtnUrl=document.getElementById('heroBtnUrl').value.trim();
+  const safeBtnUrl=safeAnnouncementLink(rawBtnUrl,'');
+  if(rawBtnUrl && !safeBtnUrl){showToast('Primary button URL is not allowed. Use a page link or https:// URL.','error');return;}
+  config.heroTitle=document.getElementById('siteHeroTitle').value.trim().slice(0,120);
+  config.heroSubtitle=document.getElementById('siteHeroSubtitle').value.trim().slice(0,280);
+  config.heroBtnText=document.getElementById('heroBtnText').value.trim().slice(0,40);
+  config.heroBtnUrl=safeBtnUrl;
+  localStorage.setItem('er_site_config',JSON.stringify(config));
+  showToast('Hero section saved!');
+}
 function saveSiteStats() { let config={}; try{config=JSON.parse(localStorage.getItem('er_site_config')||'{}');}catch(e){} const stats=[]; document.querySelectorAll('#statEditorList > div').forEach(row=>{const num=row.querySelector('.stat-num-input')?.value;const label=row.querySelector('.stat-label-input')?.value;if(num&&label)stats.push({num,label});}); config.stats=stats; localStorage.setItem('er_site_config',JSON.stringify(config)); showToast('Stats saved!'); }
-function saveBranding() { let config={}; try{config=JSON.parse(localStorage.getItem('er_site_config')||'{}');}catch(e){} config.siteName=document.getElementById('siteName').value; config.siteTagline=document.getElementById('siteTagline').value; config.colorAccent=document.getElementById('colorAccent').value; config.colorBg=document.getElementById('colorBg').value; localStorage.setItem('er_site_config',JSON.stringify(config)); document.documentElement.style.setProperty('--red',config.colorAccent); showToast('Branding saved!'); }
-function handleLogoUpload(input) { const f=input.files[0];if(!f)return; const reader=new FileReader(); reader.onload=e=>{localStorage.setItem('er_logo',e.target.result);document.getElementById('logoStatus').textContent='✅ New logo saved: '+f.name;showToast('Logo updated!');}; reader.readAsDataURL(f); }
+function saveBranding() {
+  let config={}; try{config=JSON.parse(localStorage.getItem('er_site_config')||'{}');}catch(e){}
+  config.siteName=document.getElementById('siteName').value.trim().slice(0,80);
+  config.siteTagline=document.getElementById('siteTagline').value.trim().slice(0,240);
+  config.colorAccent=safeThemeColor(document.getElementById('colorAccent').value,'#e8211a');
+  config.colorBg=safeThemeColor(document.getElementById('colorBg').value,'#0d0d0d');
+  localStorage.setItem('er_site_config',JSON.stringify(config));
+  document.documentElement.style.setProperty('--red',config.colorAccent);
+  showToast('Branding saved!');
+}
+function handleLogoUpload(input) {
+  const f=input.files[0];if(!f)return;
+  const validExt=/\.(png|jpe?g|webp|gif|ico)$/i.test(f.name);
+  const validType=!f.type || /^(image\/png|image\/jpeg|image\/webp|image\/gif|image\/x-icon|image\/vnd\.microsoft\.icon)$/i.test(f.type);
+  if(!validExt || !validType){showToast('Use a PNG, JPG, WEBP, GIF, or ICO logo. SVG is blocked for security.','error');input.value='';return;}
+  if(f.size>2*1024*1024){showToast('Logo file is too large. Keep it under 2 MB.','error');input.value='';return;}
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const safeLogo=safeImageAsset(e.target.result,'');
+    if(!safeLogo){showToast('The selected logo format is not allowed.','error');input.value='';return;}
+    localStorage.setItem('er_logo',safeLogo);
+    document.getElementById('logoStatus').textContent='New logo saved: '+f.name;
+    showToast('Logo updated!');
+  };
+  reader.readAsDataURL(f);
+}
 
 // ============================================================
 // NAVIGATION EDITOR
 // ============================================================
-const DEFAULT_NAV=[{label:'Home',url:'index.html'},{label:'Class 9',url:'class9.html'},{label:'Class 10',url:'class10.html'},{label:'Class 11',url:'class11.html'},{label:'Class 12',url:'class12.html'},{label:'Solutions',url:'solutions.html'},{label:'PYQs',url:'pyq.html'},{label:'Question Banks',url:'questionbank.html'},{label:'Quizzes',url:'quizzes.html'}];
+const DEFAULT_NAV=[{label:'Home',url:'index.html'},{label:'Class 9',url:'class9.html'},{label:'Class 10',url:'class10.html'},{label:'Class 11',url:'class11.html'},{label:'Class 12',url:'class12.html'},{label:'Solutions',url:'solutions.html'},{label:'Notes',url:'notes.html'},{label:'PYQs',url:'pyq.html'},{label:'Question Banks',url:'questionbank.html'},{label:'Quizzes',url:'quizzes.html'}];
 function getNavItemsAdmin() { try{const s=localStorage.getItem('er_nav');return s?JSON.parse(s):[...DEFAULT_NAV];}catch(e){return[...DEFAULT_NAV];} }
 function renderNavEditor() { const items=getNavItemsAdmin(); document.getElementById('navItemsList').innerHTML=items.map(item=>'<div class="nav-builder-item"><span class="drag-handle">⋮⋮</span><input type="text" value="'+safeHtml(item.label)+'" class="nav-label-input" placeholder="Label" style="flex:1;padding:7px 10px;border:1.5px solid var(--gray2);border-radius:7px;font-family:\'Nunito\';font-size:13px;font-weight:700"><input type="text" value="'+safeHtml(item.url)+'" class="nav-url-input" placeholder="URL" style="flex:2;padding:7px 10px;border:1.5px solid var(--gray2);border-radius:7px;font-family:\'Nunito\';font-size:12px"><button class="btn btn-danger" style="padding:6px 10px;font-size:11px" onclick="this.closest(\'.nav-builder-item\').remove()">✕</button></div>').join(''); }
 function addNavItem() { const list=document.getElementById('navItemsList'); const div=document.createElement('div'); div.className='nav-builder-item'; div.innerHTML='<span class="drag-handle">⋮⋮</span><input type="text" class="nav-label-input" placeholder="Label" style="flex:1;padding:7px 10px;border:1.5px solid var(--gray2);border-radius:7px;font-family:\'Nunito\';font-size:13px;font-weight:700"><input type="text" class="nav-url-input" placeholder="page.html" style="flex:2;padding:7px 10px;border:1.5px solid var(--gray2);border-radius:7px;font-family:\'Nunito\';font-size:12px"><button class="btn btn-danger" style="padding:6px 10px;font-size:11px" onclick="this.closest(\'.nav-builder-item\').remove()">✕</button>'; list.appendChild(div); div.querySelector('.nav-label-input').focus(); }
-function saveNavigation() { const items=[]; document.querySelectorAll('.nav-builder-item').forEach(row=>{const label=row.querySelector('.nav-label-input')?.value?.trim();const url=row.querySelector('.nav-url-input')?.value?.trim();if(label&&url)items.push({label,url});}); if(!items.length){showToast('Add at least one navigation link.','error');return;} localStorage.setItem('er_nav',JSON.stringify(items)); showToast('Navigation saved!'); }
+function saveNavigation() {
+  const items=[]; let hasInvalidUrl=false;
+  document.querySelectorAll('.nav-builder-item').forEach(row=>{
+    const label=(row.querySelector('.nav-label-input')?.value||'').replace(/\s+/g,' ').trim().slice(0,60);
+    const rawUrl=(row.querySelector('.nav-url-input')?.value||'').trim();
+    if(!label && !rawUrl) return;
+    const url=safeNavUrl(rawUrl,'');
+    if(label && rawUrl && url) items.push({label,url});
+    else hasInvalidUrl=true;
+  });
+  if(hasInvalidUrl){showToast('One or more navigation URLs are invalid. Use site pages or https:// links only.','error');return;}
+  if(!items.length){showToast('Add at least one navigation link.','error');return;}
+  localStorage.setItem('er_nav',JSON.stringify(items));
+  showToast('Navigation saved!');
+}
+
 function resetNavigation() { if(!confirm('Reset navigation to the default links?'))return; localStorage.removeItem('er_nav'); renderNavEditor(); showToast('Navigation reset to defaults.'); }
 
 // ============================================================
 // ANNOUNCEMENTS
 // ============================================================
 function loadAnnouncement() {
-  let a={}; try{a=JSON.parse(localStorage.getItem('er_announcement')||'{}');}catch(e){}
+  let a={}; try{a=(typeof getAnnouncement==='function' ? getAnnouncement() : JSON.parse(localStorage.getItem('er_announcement')||'{}'))||{};}catch(e){}
   document.getElementById('announcementText').value=a.text||''; document.getElementById('announcementColor').value=a.color||'#e8211a'; document.getElementById('announcementEnabled').value=a.enabled!==false?'1':'0'; document.getElementById('announcementLink').value=a.link||'';
   updateAnnouncementPreview();
 }
 function saveAnnouncement() {
-  const a={text:document.getElementById('announcementText').value.trim(),color:document.getElementById('announcementColor').value,enabled:document.getElementById('announcementEnabled').value==='1',link:document.getElementById('announcementLink').value.trim()};
+  const rawLink=document.getElementById('announcementLink').value.trim();
+  const safeLink=safeAnnouncementLink(rawLink,'');
+  if(rawLink && !safeLink){showToast('Announcement link is invalid. Use a page link, https:// URL, mailto:, or tel:.','error');return;}
+  const a={text:document.getElementById('announcementText').value.trim().slice(0,240),color:safeThemeColor(document.getElementById('announcementColor').value,'#e8211a'),enabled:document.getElementById('announcementEnabled').value==='1',link:safeLink};
   localStorage.setItem('er_announcement',JSON.stringify(a)); updateAnnouncementPreview(); showToast('Announcement saved!');
 }
 function updateAnnouncementPreview() {
-  let a={}; try{a=JSON.parse(localStorage.getItem('er_announcement')||'{}');}catch(e){}
+  let a={}; try{a=(typeof getAnnouncement==='function' ? getAnnouncement() : JSON.parse(localStorage.getItem('er_announcement')||'{}'))||{};}catch(e){}
   const preview=document.getElementById('announcementPreview'); if(!preview)return;
-  if(a.text)preview.innerHTML='<div style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Preview:</div><div style="background:'+safeHtml(a.color||'#e8211a')+';color:#fff;padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:space-between"><span>'+safeHtml(a.text)+'</span><span style="font-size:18px;cursor:pointer">✕</span></div>';
+  if(a.text)preview.innerHTML='<div style="font-size:12px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Preview:</div><div style="background:'+safeThemeColor(a.color||'#e8211a','#e8211a')+';color:#fff;padding:10px 16px;border-radius:8px;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:space-between"><span>'+safeHtml(a.text)+'</span><span style="font-size:18px;cursor:pointer">x</span></div>';
   else preview.innerHTML='';
 }
 
@@ -1254,16 +1514,32 @@ function loadSettings() {
   ].map(s=>'<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--gray2);font-size:13px"><span style="font-weight:700;color:var(--muted)">'+s.label+'</span><span style="font-weight:900">'+s.val+'</span></div>').join('');
   const features=(()=>{try{return JSON.parse(localStorage.getItem('er_features')||'{}');}catch(e){return{};}})();
   ['quizzes','pyqs','qbs','solutions'].forEach(f=>{const btn=document.getElementById('toggle'+f.charAt(0).toUpperCase()+f.slice(1));if(btn)btn.className='toggle'+(features[f]!==false?' on':'');});
-  const display=document.getElementById('adminPasswordDisplay'); if(display){display.dataset.revealed='0';display.textContent=maskPassword(ADMIN_PASS);}
+  const display=document.getElementById('adminPasswordDisplay'); if(display){display.dataset.revealed='0';display.textContent=maskPassword();}
 }
-function maskPassword(v){return '•'.repeat(Math.max(8,v.length));}
-function updateStrengthMeter(val){let s=0;if(val.length>=8)s++;if(val.length>=12)s++;if(/[A-Z]/.test(val)&&/[0-9]/.test(val))s++;if(/[^A-Za-z0-9]/.test(val))s++;['ps1','ps2','ps3','ps4'].forEach((id,i)=>{const el=document.getElementById(id);if(!el)return;el.className='pw-strength-bar'+(i<s?(' '+(['weak','ok','good','good'][i])):'');});const lbl=document.getElementById('pwStrengthLabel');if(lbl)lbl.textContent=val.length>0?['','Weak','Fair','Strong','Very Strong'][s]:'';}
+function maskPassword(){return 'Stored securely as a hash';}
+function getPasswordStrengthScore(val){let s=0;if(val.length>=12)s++;if(/[a-z]/.test(val)&&/[A-Z]/.test(val))s++;if(/\d/.test(val))s++;if(/[^A-Za-z0-9]/.test(val))s++;return s;}
+function updateStrengthMeter(val){const s=getPasswordStrengthScore(val);['ps1','ps2','ps3','ps4'].forEach((id,i)=>{const el=document.getElementById(id);if(!el)return;el.className='pw-strength-bar'+(i<s?(' '+(['weak','ok','good','good'][i])):'');});const lbl=document.getElementById('pwStrengthLabel');if(lbl)lbl.textContent=val.length>0?(['','Weak','Fair','Strong','Very Strong'][s]+(val.length<12?' - use 12+ chars':'')):'';}
 function toggleInputVisibility(id,btn){const input=document.getElementById(id);if(!input)return;const hide=input.type==='password';input.type=hide?'text':'password';if(btn)btn.textContent=hide?'Hide':'Show';}
-function toggleCurrentPassword(btn){const display=document.getElementById('adminPasswordDisplay');if(!display)return;const reveal=display.dataset.revealed!=='1';display.dataset.revealed=reveal?'1':'0';display.textContent=reveal?ADMIN_PASS:maskPassword(ADMIN_PASS);if(btn)btn.textContent=reveal?'Hide Password':'Show Password';}
-function copyAdminPassword(){const copy=()=>{const ta=document.createElement('textarea');ta.value=ADMIN_PASS;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');showToast('Password copied!');}catch(e){showToast('Copy failed.','error');}ta.remove();};if(navigator.clipboard?.writeText)navigator.clipboard.writeText(ADMIN_PASS).then(()=>showToast('Password copied!')).catch(copy);else copy();}
+function toggleCurrentPassword(btn){const display=document.getElementById('adminPasswordDisplay');if(display){display.dataset.revealed='0';display.textContent=maskPassword();}if(btn)btn.textContent='Show Password';showToast('For security, the saved admin password is not viewable in the browser.','warn');}
+function copyAdminPassword(){showToast('Copying the saved admin password is disabled for security.','warn');}
 function toggleFeature(btn){btn.classList.toggle('on');}
 function saveFeatureToggles(){const features={};['quizzes','pyqs','qbs','solutions'].forEach(f=>{const btn=document.getElementById('toggle'+f.charAt(0).toUpperCase()+f.slice(1));features[f]=!!(btn?.classList.contains('on'));});localStorage.setItem('er_features',JSON.stringify(features));showToast('Feature toggles saved!');}
-function changePassword(){const curr=document.getElementById('currPass').value,newP=document.getElementById('newPass').value,conf=document.getElementById('confirmPass').value;if(curr!==ADMIN_PASS){showToast('Current password is wrong.','error');return;}if(newP.length<8){showToast('New password must be at least 8 characters.','error');return;}if(newP!==conf){showToast('Passwords do not match.','error');return;}if(newP===curr){showToast('New password must be different.','warn');return;}ADMIN_PASS=newP;localStorage.setItem('er_admin_pass',newP);['currPass','newPass','confirmPass'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});const display=document.getElementById('adminPasswordDisplay');if(display){display.dataset.revealed='0';display.textContent=maskPassword(ADMIN_PASS);}updateStrengthMeter('');showToast('Password updated successfully!');}
+async function changePassword(){
+  const curr=document.getElementById('currPass').value,newP=document.getElementById('newPass').value,conf=document.getElementById('confirmPass').value;
+  if(!(await verifyAdminPassword(curr))){showToast('Current password is wrong.','error');return;}
+  if(newP!==conf){showToast('Passwords do not match.','error');return;}
+  if(newP===curr){showToast('New password must be different.','warn');return;}
+  if(newP.length<12 || !/[a-z]/.test(newP) || !/[A-Z]/.test(newP) || !/\d/.test(newP) || !/[^A-Za-z0-9]/.test(newP)){showToast('Use 12+ characters with uppercase, lowercase, number, and symbol.','error');return;}
+  const newHash=await deriveAdminPasswordHash(newP);
+  localStorage.setItem(ADMIN_HASH_KEY,newHash);
+  localStorage.removeItem(LEGACY_ADMIN_PASS_KEY);
+  adminHashReady=Promise.resolve(newHash);
+  ['currPass','newPass','confirmPass'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const display=document.getElementById('adminPasswordDisplay');if(display){display.dataset.revealed='0';display.textContent=maskPassword();}
+  updateStrengthMeter('');
+  touchAdminSession();
+  showToast('Password updated and stored securely!');
+}
 
 // ============================================================
 // DATA MANAGEMENT
@@ -1283,8 +1559,8 @@ function setupDragDrop(){const area=document.getElementById('uploadArea');if(!ar
 // ============================================================
 function setupTextSolutionManager(){
   const listSection=document.getElementById('sec-solutions'); const editorSection=document.getElementById('sec-upload-solution'); if(!listSection||!editorSection)return;
-  listSection.innerHTML='<div class="page-title">Solution Articles</div><div class="page-subtitle">Create, edit, and remove text-based solution posts.</div><div class="filter-bar"><select class="filter-select" id="solClassFilter" onchange="renderSolutionsTable()"><option value="">All Classes</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select><button class="btn btn-red" onclick="startSolutionPost()">+ New Article</button></div><div class="table-card"><div class="table-header"><h3>Published Solution Articles</h3><span style="font-size:12px;color:var(--muted);font-weight:700" id="solCount"></span></div><div style="overflow-x:auto"><table><thead><tr><th>Title</th><th>Class</th><th>Subject</th><th>Summary</th><th>Updated</th><th>Actions</th></tr></thead><tbody id="solTableBody"></tbody></table></div></div>';
-  editorSection.innerHTML='<div class="page-title" id="solutionEditorTitle">Create Solution Article</div><div class="page-subtitle">Write chapter solutions, explanations, and answer keys.</div><div class="form-card" style="max-width:none"><div class="table-header"><h3>Article Editor</h3></div><div class="form-body"><input type="hidden" id="solEditId"><div class="solution-editor-grid"><div><div class="form-group"><label>Article Title *</label><input type="text" id="solName" placeholder="e.g. Class 10 Science - Chemical Reactions Solutions"></div><div class="form-row"><div class="form-group"><label>Class *</label><select id="solClass" onchange="onSolClassChange()"><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select></div><div class="form-group"><label>Subject *</label><select id="solSubject" onchange="onSolSubjectChange()"></select></div></div><div class="form-group"><label>Chapter (optional)</label><select id="solChapter"><option value="">— No Chapter —</option></select></div><div class="form-group"><label>Short Summary *</label><textarea id="solSummary" rows="4" placeholder="One short summary for cards and article header." oninput="updateSolutionEditorStats()"></textarea></div><div class="form-group"><label>Solution Content *</label><textarea id="solContent" rows="15" placeholder="Write the full solution here. Use blank lines between paragraphs. Start list lines with - for bullets." oninput="updateSolutionEditorStats()"></textarea></div></div><div class="solution-editor-aside"><div class="table-card"><div class="table-header"><h3>Editor Stats</h3></div><div class="form-body" id="solutionEditorStats"></div></div><div class="solution-tips-card"><h4>Writing tips</h4><p>Keep summaries under two lines. Use short paragraphs and break steps clearly so articles are easy to read on mobile.</p></div></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px"><button class="btn btn-red btn-lg" onclick="uploadSolution()">💾 Save Article</button><button class="btn btn-gray btn-lg" onclick="resetSolutionForm()">↺ Clear</button><button class="btn btn-gray btn-lg" onclick="showSection(\'solutions\')">Back</button></div></div></div>';
+  listSection.innerHTML='<div class="page-title">Solution Articles</div><div class="page-subtitle">Manage published solution articles and chapter-level study content.</div><div class="filter-bar"><select class="filter-select" id="solClassFilter" onchange="renderSolutionsTable()"><option value="">All Classes</option><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select><button class="btn btn-red" onclick="startSolutionPost()">+ New Article</button></div><div class="table-card"><div class="table-header"><h3>Published Solution Articles</h3><span style="font-size:12px;color:var(--muted);font-weight:700" id="solCount"></span></div><div style="overflow-x:auto"><table><thead><tr><th>Title</th><th>Class</th><th>Subject</th><th>Summary</th><th>Updated</th><th>Actions</th></tr></thead><tbody id="solTableBody"></tbody></table></div></div>';
+  editorSection.innerHTML='<div class="page-title" id="solutionEditorTitle">Create Solution Article</div><div class="page-subtitle">Write and publish detailed text solutions for students.</div><div class="form-card" style="max-width:none"><div class="table-header"><h3>Article Editor</h3></div><div class="form-body"><input type="hidden" id="solEditId"><div class="solution-editor-grid"><div><div class="form-group"><label>Article Title *</label><input type="text" id="solName" placeholder="e.g. Class 10 Science - Chemical Reactions Solutions"></div><div class="form-row"><div class="form-group"><label>Class *</label><select id="solClass" onchange="onSolClassChange()"><option value="9">Class 9</option><option value="10">Class 10</option><option value="11">Class 11</option><option value="12">Class 12</option></select></div><div class="form-group"><label>Subject *</label><select id="solSubject" onchange="onSolSubjectChange()"></select></div></div><div class="form-group"><label>Chapter (optional)</label><select id="solChapter"><option value="">— No Chapter —</option></select></div><div class="form-group"><label>Short Summary *</label><textarea id="solSummary" rows="4" placeholder="One short summary for cards and article header." oninput="updateSolutionEditorStats()"></textarea></div><div class="form-group"><label>Solution Content *</label><textarea id="solContent" rows="15" placeholder="Write the full solution here. Use blank lines between paragraphs. Start list lines with - for bullets." oninput="updateSolutionEditorStats()"></textarea></div></div><div class="solution-editor-aside"><div class="table-card"><div class="table-header"><h3>Editor Stats</h3></div><div class="form-body" id="solutionEditorStats"></div></div><div class="solution-tips-card"><h4>Writing tips</h4><p>Keep summaries under two lines. Use short paragraphs and break steps clearly so articles are easy to read on mobile.</p></div></div></div><div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px"><button class="btn btn-red btn-lg" onclick="uploadSolution()">💾 Save Article</button><button class="btn btn-gray btn-lg" onclick="resetSolutionForm()">↺ Clear</button><button class="btn btn-gray btn-lg" onclick="showSection(\'solutions\')">Back</button></div></div></div>';
   updateSubjectOptions('solSubject','solClass'); setTimeout(()=>refreshChapterDropdown('solChapter','solClass','solSubject'),40);
 }
 function updateSolutionEditorStats(){const summary=document.getElementById('solSummary')?.value?.trim()||'';const content=document.getElementById('solContent')?.value?.trim()||'';const stats=document.getElementById('solutionEditorStats');if(!stats)return;const words=content?content.split(/\s+/).filter(Boolean).length:0;const paragraphs=content?content.split(/\n\s*\n/).filter(b=>b.trim()).length:0;stats.innerHTML=[{label:'Summary',val:summary.length+' chars'},{label:'Body words',val:words},{label:'Paragraphs',val:paragraphs},{label:'Reading style',val:words>140?'Full article':'Short note'}].map(s=>'<div class="solution-metric"><span>'+s.label+'</span><strong>'+s.val+'</strong></div>').join('');}
@@ -1310,186 +1586,246 @@ function editSolutionPost(id){
 function deleteSolutionPost(id){if(!confirm('Delete this solution article permanently?'))return;saveSolutionPostsStore(getSolutionPostsStore().filter(p=>p.id!==id));renderSolutionsTable();renderDashboard();showToast('Solution article deleted.');}
 
 // ============================================================
-// ====== AD MANAGER — FULLY INTEGRATED ======
+// ====== AD MANAGER — COMPLETE REWRITE (replaces old version)
 // ============================================================
+// This replaces the ad manager JS block in admin.html.
+// Paste this entire block to replace the old "AD MANAGER" section.
 
-// All slots controlled from this admin panel.
-// Both shared.js (getManagedAdSlotHtml / insertSmartAds)
-// and ads.js (getSlot / getCode) read from er_ad_slots in localStorage.
-
-const AD_SLOT_GROUPS = [
+// ─── Master slot groups (matches shared.js AD_SLOT_REGISTRY) ───────────────
+var AD_SLOT_GROUPS = [
   {
     group: '🌐 Global — All Pages',
     desc: 'These slots appear on every public page of the site.',
     slots: [
-      { key:'top',           label:'Top Banner',                  where:'After hero, before main content',    pages:'All public pages',         size:'728×90 leaderboard or Responsive', system:'shared.js',         priority:'high',     tip:'Best for leaderboard (728×90) or a responsive ad unit. Gets seen before any scrolling.' },
-      { key:'top_banner',    label:'Top Banner (ads.js)',          where:'After hero — ads.js injection',      pages:'All public pages',         size:'Responsive',                       system:'ads.js',            priority:'high',     tip:'Same placement as above for the ads.js system. Paste the same AdSense code in both.' },
-      { key:'footer',        label:'Pre-Footer Banner',           where:'Just above the footer',              pages:'All public pages',         size:'336×280 or Responsive',            system:'shared.js',         priority:'medium',   tip:'High viewability — users see this just before leaving the page.' },
-      { key:'pre_footer',    label:'Pre-Footer Banner (ads.js)',   where:'Above footer — ads.js injection',    pages:'All public pages',         size:'Responsive',                       system:'ads.js',            priority:'medium',   tip:'Same placement as above for ads.js. Use the same code.' },
+      { key:'top',        label:'Top Banner',                  where:'After hero, before main content',   pages:'All public pages',              size:'728×90 or Responsive', system:'shared.js',          priority:'high',     tip:'Best for leaderboard (728×90) or responsive. Shown before any scrolling.' },
+      { key:'top_banner', label:'Top Banner (ads.js)',         where:'After hero — ads.js injection',     pages:'All public pages',              size:'Responsive',           system:'ads.js',             priority:'high',     tip:'Same placement for the ads.js injection system. Paste the same AdSense code in both top slots.' },
+      { key:'footer',     label:'Pre-Footer Banner',           where:'Just above the footer',             pages:'All public pages',              size:'336×280 or Responsive', system:'shared.js',         priority:'medium',   tip:'High viewability — users see this just before navigating away.' },
+      { key:'pre_footer', label:'Pre-Footer Banner (ads.js)',  where:'Above footer — ads.js injection',   pages:'All public pages',              size:'Responsive',           system:'ads.js',             priority:'medium',   tip:'Same placement for ads.js. Paste the same code as the Pre-Footer slot.' },
     ]
   },
   {
     group: '📰 In-Content Breaks',
-    desc: 'Injected inside page content between sections or articles.',
+    desc: 'Injected inside page content between sections. Great for in-article format ads.',
     slots: [
-      { key:'inline',           label:'Inline Break (shared.js)',    where:'Between content sections in main',  pages:'All public pages',         size:'In-article / Responsive',          system:'shared.js',         priority:'high',     tip:'Injected between the 2nd and 3rd content blocks. Great for in-article format ads.' },
-      { key:'inline_1',         label:'Inline Break 1 (ads.js)',     where:'First natural content break',       pages:'All public pages',         size:'In-article / Responsive',          system:'ads.js',            priority:'high',     tip:'First in-article placement from the ads.js system.' },
-      { key:'inline_2',         label:'Inline Break 2 (ads.js)',     where:'Second content break',              pages:'Pages with 4+ sections',   size:'In-article / Responsive',          system:'ads.js',            priority:'medium',   tip:'Shown on longer pages. Compact format works best here.' },
-      { key:'inline_3',         label:'Inline Break 3 (ads.js)',     where:'Third content break',               pages:'Pages with 6+ sections',   size:'In-article / Responsive',          system:'ads.js',            priority:'medium',   tip:'Only appears on very long listing pages.' },
-      { key:'between',          label:'Between Sections (shared.js)',where:'Between 2nd and 3rd class blocks',  pages:'Class & listing pages',    size:'Native / In-feed',                 system:'shared.js',         priority:'medium',   tip:'Best for native or in-feed ads that blend with the content grid layout.' },
-      { key:'between_sections', label:'Between Sections (ads.js)',   where:'Between class/chapter blocks',      pages:'Class & listing pages',    size:'Native / In-feed',                 system:'ads.js',            priority:'medium',   tip:'Same placement for ads.js system.' },
+      { key:'inline',           label:'Inline Break (shared.js)',    where:'Between content sections in main',  pages:'All public pages',         size:'In-article / Responsive', system:'shared.js',   priority:'high',   tip:'Injected between 2nd and 3rd content blocks. Best for in-article or native format.' },
+      { key:'inline_1',         label:'Inline Break 1 (ads.js)',     where:'First natural content break',       pages:'All public pages',         size:'In-article / Responsive', system:'ads.js',      priority:'high',   tip:'First in-article placement from the ads.js system.' },
+      { key:'inline_2',         label:'Inline Break 2 (ads.js)',     where:'Second content break',              pages:'Pages with 4+ sections',   size:'In-article / Responsive', system:'ads.js',      priority:'medium', tip:'Shown on longer pages only. Use compact format.' },
+      { key:'inline_3',         label:'Inline Break 3 (ads.js)',     where:'Third content break',               pages:'Pages with 6+ sections',   size:'In-article / Responsive', system:'ads.js',      priority:'medium', tip:'Only appears on very long listing pages.' },
+      { key:'between',          label:'Between Sections (shared.js)',where:'After 2nd .class-section block',    pages:'Class & listing pages',    size:'Native / In-feed',        system:'shared.js',   priority:'medium', tip:'Best for native or in-feed ads that blend with the content grid.' },
+      { key:'between_sections', label:'Between Sections (ads.js)',   where:'Between class/chapter blocks',      pages:'Class & listing pages',    size:'Native / In-feed',        system:'ads.js',      priority:'medium', tip:'Same placement for ads.js system.' },
     ]
   },
   {
     group: '🎯 High-Intent Pages',
-    desc: 'Slots on quiz, solution, and results pages — highest purchase intent.',
+    desc: 'Slots on quiz, solution, and results pages — highest student purchase intent.',
     slots: [
-      { key:'results',        label:'Results / Post-Article',       where:'After quiz results or article end',  pages:'quiz.html, solution-post.html', size:'Responsive',              system:'shared.js',         priority:'veryhigh', tip:'Students just finished studying — peak intent. Use coaching, book, or mock-test ads here.' },
-      { key:'results_banner', label:'Results Banner (ads.js)',      where:'After quiz result card',             pages:'quiz.html, solution-post.html', size:'Responsive',              system:'ads.js',            priority:'veryhigh', tip:'Same high-intent placement from the ads.js system. Use the same ad code.' },
-      { key:'solution_mid',   label:'Mid-Article (ads.js)',         where:'Halfway through solution article',   pages:'solution-post.html',            size:'In-article / Native',     system:'ads.js',            priority:'high',     tip:'Inserted mid-read when engagement is highest. Great for in-article format.' },
-      { key:'quiz_sidebar',   label:'Quiz Sidebar (ads.js)',        where:'Inside quiz page side panel',        pages:'quiz.html',                     size:'160×600 or Responsive',   system:'ads.js',            priority:'high',     tip:'Shown while a student is actively taking a quiz — captive audience.' },
+      { key:'results',        label:'Results / Post-Article',      where:'After quiz results or article end',  pages:'quiz.html, solution-post.html', size:'Responsive',              system:'shared.js', priority:'veryhigh', tip:'Peak intent placement — students just finished studying. Use coaching, books, or mock-test ads.' },
+      { key:'results_banner', label:'Results Banner (ads.js)',     where:'After quiz result card',             pages:'quiz.html, solution-post.html', size:'Responsive',              system:'ads.js',    priority:'veryhigh', tip:'Same high-intent placement for ads.js. Use the same code.' },
+      { key:'solution_mid',   label:'Mid-Article (ads.js)',        where:'Halfway through solution article',   pages:'solution-post.html',            size:'In-article / Native',     system:'ads.js',    priority:'high',     tip:'Inserted mid-read when engagement is highest.' },
+      { key:'quiz_sidebar',   label:'Quiz Sidebar (ads.js)',       where:'Inside quiz page side panel',        pages:'quiz.html',                     size:'160×600 or Responsive',   system:'ads.js',    priority:'high',     tip:'Shown while a student is actively taking a quiz.' },
+      { key:'pdf_viewer',     label:'PDF Viewer Banner',           where:'Between the PDF toolbar and viewer', pages:'pdf-viewer.html',               size:'Responsive',              system:'shared.js', priority:'high',     tip:'Dedicated monetisation slot for PDF previews without breaking the viewer layout.' },
     ]
   },
   {
-    group: '📌 Sticky / Persistent Placements',
+    group: '📌 Sticky / Persistent',
     desc: 'Fixed placements that follow the user as they scroll — highest CPM.',
     slots: [
-      { key:'sticky',          label:'Sticky Sidebar (shared.js)',   where:'Fixed right sidebar, appears after 2s', pages:'Desktop ≥1280px only',    size:'160×600 skyscraper',       system:'shared.js',         priority:'veryhigh', tip:'Highest revenue per session on desktop. Use a 160×600 skyscraper unit. Dismissable.' },
-      { key:'sidebar_sticky',  label:'Sticky Sidebar (ads.js)',      where:'Fixed right sidebar — ads.js',          pages:'Desktop ≥1280px only',    size:'160×600 skyscraper',       system:'ads.js',            priority:'veryhigh', tip:'Same slot for ads.js system. Paste the same code as the one above.' },
-      { key:'mobile_bottom',   label:'Mobile Sticky Bottom Bar',     where:'Fixed bottom bar, slides up after 3s',  pages:'Mobile ≤768px only',      size:'320×50 or 320×100',        system:'shared.js + ads.js', priority:'veryhigh', tip:'Highest CTR on mobile. Both systems share this one key. Very easy to monetise.' },
+      { key:'sticky',        label:'Sticky Sidebar (shared.js)',  where:'Fixed right sidebar, appears after 2s', pages:'Desktop ≥1280px only', size:'160×600 skyscraper',  system:'shared.js',          priority:'veryhigh', tip:'Highest desktop revenue. Use a 160×600 skyscraper unit. Dismissable by user.' },
+      { key:'sidebar_sticky',label:'Sticky Sidebar (ads.js)',     where:'Fixed right sidebar — ads.js',          pages:'Desktop ≥1280px only', size:'160×600 skyscraper',  system:'ads.js',             priority:'veryhigh', tip:'Same slot for ads.js. Paste the same code as Sticky Sidebar above.' },
+      { key:'mobile_bottom', label:'Mobile Sticky Bottom Bar',    where:'Fixed bottom bar, slides up after 3s',  pages:'Mobile ≤768px only',   size:'320×50 or 320×100',   system:'shared.js + ads.js', priority:'veryhigh', tip:'Highest CTR on mobile. Both systems share this key. Very easy to monetise.' },
     ]
   },
 ];
 
-const ALL_AD_SLOTS = AD_SLOT_GROUPS.flatMap(g => g.slots);
+// Flat array of all slots
+var ALL_AD_SLOTS = (function() {
+  var all = [];
+  AD_SLOT_GROUPS.forEach(function(g) { g.slots.forEach(function(s) { all.push(s); }); });
+  return all;
+})();
+
+var AD_SLOT_LINKS = [
+  ['top', 'top_banner'],
+  ['footer', 'pre_footer'],
+  ['between', 'between_sections'],
+  ['sticky', 'sidebar_sticky']
+];
+
+function normalizeAdSlots(input) {
+  var raw = (input && typeof input === 'object' && !Array.isArray(input)) ? input : {};
+  var out = {};
+  ALL_AD_SLOTS.forEach(function(s) {
+    out[s.key] = Object.assign({ enabled: true, adCode: '' }, raw[s.key] || {});
+  });
+  Object.keys(raw).forEach(function(k) {
+    if (!out[k]) out[k] = Object.assign({ enabled: true, adCode: '' }, raw[k]);
+  });
+  AD_SLOT_LINKS.forEach(function(pair) {
+    var primary = out[pair[0]] || { enabled: true, adCode: '' };
+    var alias = out[pair[1]] || { enabled: true, adCode: '' };
+    var primaryCode = (primary.adCode || '').trim();
+    var aliasCode = (alias.adCode || '').trim();
+    var source = primaryCode ? primary : aliasCode ? alias : (primary.enabled === false && alias.enabled !== false ? alias : primary);
+    var synced = {
+      enabled: source.enabled !== false,
+      adCode: source.adCode || ''
+    };
+    out[pair[0]] = Object.assign({}, out[pair[0]] || {}, synced);
+    out[pair[1]] = Object.assign({}, out[pair[1]] || {}, synced);
+  });
+  return out;
+}
 
 function loadAdSlots() {
   try {
-    const saved = JSON.parse(localStorage.getItem('er_ad_slots') || '{}');
-    const out = {};
-    ALL_AD_SLOTS.forEach(s => { out[s.key] = { enabled: true, adCode: '', ...(saved[s.key] || {}) }; });
-    return out;
-  } catch(e) { return {}; }
+    var saved = JSON.parse(localStorage.getItem('er_ad_slots') || '{}');
+    return normalizeAdSlots(saved);
+  } catch(e) { return normalizeAdSlots({}); }
 }
 
 function persistAdSlots(slots) {
-  localStorage.setItem('er_ad_slots', JSON.stringify(slots));
+  localStorage.setItem('er_ad_slots', JSON.stringify(normalizeAdSlots(slots)));
 }
 
 function renderAdManager() {
-  const container  = document.getElementById('adSlotsContainer');
-  const statsInner = document.getElementById('adStatsInner');
+  var container  = document.getElementById('adSlotsContainer');
+  var statsInner = document.getElementById('adStatsInner');
   if (!container) return;
 
-  const slots      = loadAdSlots();
-  const activeCount = ALL_AD_SLOTS.filter(s => slots[s.key]?.enabled !== false).length;
-  const codedCount  = ALL_AD_SLOTS.filter(s => (slots[s.key]?.adCode || '').trim()).length;
+  var slots       = loadAdSlots();
+  var activeCount = ALL_AD_SLOTS.filter(function(s) { return slots[s.key] && slots[s.key].enabled !== false; }).length;
+  var codedCount  = ALL_AD_SLOTS.filter(function(s) { return slots[s.key] && (slots[s.key].adCode || '').trim(); }).length;
 
   if (statsInner) {
-    statsInner.innerHTML = `
-      <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
-        <span style="font-size:14px;font-weight:800;color:#fff"><span style="color:#7fff9a">${activeCount}</span><span style="color:#aaa"> / ${ALL_AD_SLOTS.length} slots enabled</span></span>
-        <span style="font-size:14px;font-weight:800;color:#fff"><span style="color:${codedCount > 0 ? '#7fff9a' : '#ff9a9a'}">${codedCount}</span><span style="color:#aaa"> have real ad code</span></span>
-        ${codedCount === 0
-          ? `<span style="font-size:11px;font-weight:800;color:#ffdd88;background:rgba(255,200,0,.12);padding:4px 12px;border-radius:20px;border:1px solid rgba(255,200,0,.25)">⚠ Showing native placeholders — paste AdSense code to go live</span>`
-          : `<span style="font-size:11px;font-weight:800;color:#7fff9a;background:rgba(100,255,100,.1);padding:4px 12px;border-radius:20px;border:1px solid rgba(100,255,100,.2)">✅ Real ads active on ${codedCount} slot${codedCount !== 1 ? 's' : ''}</span>`}
-      </div>`;
+    statsInner.innerHTML =
+      '<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">' +
+        '<span style="font-size:14px;font-weight:800;color:#fff">' +
+          '<span style="color:#7fff9a">' + activeCount + '</span>' +
+          '<span style="color:#aaa"> / ' + ALL_AD_SLOTS.length + ' slots enabled</span>' +
+        '</span>' +
+        '<span style="font-size:14px;font-weight:800;color:#fff">' +
+          '<span style="color:' + (codedCount > 0 ? '#7fff9a' : '#ff9a9a') + '">' + codedCount + '</span>' +
+          '<span style="color:#aaa"> have real ad code</span>' +
+        '</span>' +
+        (codedCount === 0
+          ? '<span style="font-size:11px;font-weight:800;color:#ffdd88;background:rgba(255,200,0,.12);padding:4px 12px;border-radius:20px;border:1px solid rgba(255,200,0,.25)">⚠ No AdSense code live yet - empty slots stay hidden</span>'
+          : '<span style="font-size:11px;font-weight:800;color:#7fff9a;background:rgba(100,255,100,.1);padding:4px 12px;border-radius:20px;border:1px solid rgba(100,255,100,.2)">✅ Live AdSense code active on ' + codedCount + ' slot' + (codedCount !== 1 ? 's' : '') + '</span>') +
+      '</div>';
   }
 
-  let html = '';
-  AD_SLOT_GROUPS.forEach(group => {
-    html += `<div style="margin-bottom:28px">
-      <div class="ad-group-title">${group.group}</div>
-      <p class="ad-group-desc">${safeHtml(group.desc)}</p>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        ${group.slots.map(s => buildAdSlotCard(s, slots[s.key] || {})).join('')}
-      </div>
-    </div>`;
+  var html = '';
+  AD_SLOT_GROUPS.forEach(function(group) {
+    html += '<div style="margin-bottom:28px">';
+    html += '<div class="ad-group-title">' + group.group + '</div>';
+    html += '<p class="ad-group-desc">' + safeHtml(group.desc) + '</p>';
+    html += '<div style="display:flex;flex-direction:column;gap:10px">';
+    group.slots.forEach(function(s) {
+      html += buildAdSlotCard(s, slots[s.key] || {});
+    });
+    html += '</div></div>';
   });
   container.innerHTML = html;
 }
 
 function buildAdSlotCard(s, cfg) {
-  const enabled  = cfg.enabled !== false;
-  const adCode   = cfg.adCode || '';
-  const hasCode  = !!adCode.trim();
-  const borderColor = hasCode && enabled ? 'rgba(47,158,68,.4)' : enabled ? 'var(--gray2)' : 'rgba(200,0,0,.2)';
-  const statusHtml  = hasCode && enabled
+  var enabled  = cfg.enabled !== false;
+  var adCode   = cfg.adCode || '';
+  var hasCode  = !!adCode.trim();
+  var borderColor = hasCode && enabled ? 'rgba(47,158,68,.4)' : enabled ? 'var(--gray2)' : 'rgba(200,0,0,.2)';
+  var statusHtml  = hasCode && enabled
     ? '<span class="ad-status-live">✅ Live</span>'
     : enabled
     ? '<span class="ad-status-empty">⭕ No code</span>'
     : '<span class="ad-status-off">🔴 Off</span>';
 
-  const priorityMap = { veryhigh:'badge-red', high:'badge-orange', medium:'badge-blue' };
-  const priorityLabel = { veryhigh:'⭐⭐ Very High', high:'⭐ High', medium:'Medium' };
-  const systemColor = s.system.includes('shared') && s.system.includes('ads')
+  var priorityMap   = { veryhigh:'badge-red', high:'badge-orange', medium:'badge-blue' };
+  var priorityLabel = { veryhigh:'⭐⭐ Very High', high:'⭐ High', medium:'Medium' };
+  var sysStr = String(s.system || '');
+  var systemColor = (sysStr.indexOf('shared') !== -1 && sysStr.indexOf('ads') !== -1)
     ? 'background:#e6ffed;color:#2f9e44'
-    : s.system.includes('shared')
+    : sysStr.indexOf('shared') !== -1
     ? 'background:#f0f4ff;color:#3b5bdb'
     : 'background:#f3f0ff;color:#6741d9';
 
-  return `<div class="ad-slot-card ${hasCode && enabled ? 'has-code' : ''} ${!enabled ? 'disabled' : ''}" id="adcard-${safeHtml(s.key)}" style="border-color:${borderColor}">
-    <div class="ad-slot-header">
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
-          <strong style="font-size:14px">${safeHtml(s.label)}</strong>
-          ${statusHtml}
-          <span class="badge ${priorityMap[s.priority]||'badge-blue'}">${priorityLabel[s.priority]||s.priority}</span>
-          <span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;${systemColor}">${safeHtml(s.system)}</span>
-        </div>
-        <div style="font-size:11.5px;color:var(--muted);font-weight:700;line-height:1.7">
-          📍 <strong style="color:var(--text)">Where:</strong> ${safeHtml(s.where)} &nbsp;|&nbsp;
-          📄 <strong style="color:var(--text)">Pages:</strong> ${safeHtml(s.pages)} &nbsp;|&nbsp;
-          📐 <strong style="color:var(--text)">Size:</strong> ${safeHtml(s.size)}
-        </div>
-        <div class="ad-tip">💡 ${safeHtml(s.tip)}</div>
-      </div>
-      <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
-        <span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Enable</span>
-        <button class="toggle ${enabled ? 'on' : ''}" id="adtoggle-${safeHtml(s.key)}" onclick="this.classList.toggle('on')"></button>
-      </div>
-    </div>
-    <div style="margin-bottom:10px">
-      <label style="display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:5px">
-        <span>Ad Code</span>
-        <span style="color:${hasCode ? 'var(--green)' : 'var(--muted)'}">
-          ${hasCode ? `✓ ${adCode.trim().length} chars — live code set` : 'Empty — showing styled native placeholder'}
-        </span>
-      </label>
-      <textarea class="ad-slot-code ${hasCode ? 'filled' : ''}" id="adcode-${safeHtml(s.key)}" rows="3"
-        placeholder="Paste your Google AdSense, Media.net, or any &lt;script&gt; / &lt;ins&gt; code here…"
-        onfocus="this.style.borderColor='var(--red)'"
-        onblur="this.style.borderColor=(this.value.trim()?'var(--green)':'var(--gray2)')"
-      >${safeHtml(adCode)}</textarea>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-      <button class="btn btn-red" onclick="adMgr.saveSlot('${safeHtml(s.key)}')">💾 Save Slot</button>
-      ${hasCode ? `<button class="btn btn-danger" onclick="adMgr.clearSlot('${safeHtml(s.key)}')">✕ Clear Code</button>` : ''}
-      <code style="margin-left:auto;background:#f4f4f4;padding:3px 9px;border-radius:6px;font-size:11px;color:var(--muted)">${safeHtml(s.key)}</code>
-    </div>
-  </div>`;
+  // Use data-key attribute instead of inline JS string interpolation for onclick handlers
+  // to avoid HTML-escaping issues with single quotes in the key names.
+  var cardId = 'adcard-' + safeHtml(s.key);
+  var toggleId = 'adtoggle-' + safeHtml(s.key);
+  var codeId   = 'adcode-'   + safeHtml(s.key);
+
+  return '<div class="ad-slot-card ' + (hasCode && enabled ? 'has-code' : '') + ' ' + (!enabled ? 'disabled' : '') + '" id="' + cardId + '" style="border:2px solid ' + borderColor + ';background:#fff;border-radius:14px;padding:18px 20px;transition:border-color .2s">' +
+    // Header row
+    '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">' +
+          '<strong style="font-size:14px">' + safeHtml(s.label) + '</strong>' +
+          statusHtml +
+          '<span class="badge ' + (priorityMap[s.priority] || 'badge-blue') + '">' + (priorityLabel[s.priority] || s.priority) + '</span>' +
+          '<span style="font-size:10px;font-weight:800;padding:2px 8px;border-radius:20px;' + systemColor + '">' + safeHtml(s.system) + '</span>' +
+        '</div>' +
+        '<div style="font-size:11.5px;color:var(--muted);font-weight:700;line-height:1.7">' +
+          '📍 <strong style="color:var(--text)">Where:</strong> ' + safeHtml(s.where) + ' &nbsp;|&nbsp; ' +
+          '📄 <strong style="color:var(--text)">Pages:</strong> ' + safeHtml(s.pages) + ' &nbsp;|&nbsp; ' +
+          '📐 <strong style="color:var(--text)">Size:</strong> ' + safeHtml(s.size) +
+        '</div>' +
+        '<div style="margin-top:8px;padding:8px 12px;background:#fffbf0;border:1px solid #ffe8a0;border-radius:8px;font-size:11.5px;font-weight:700;color:#7a5800">💡 ' + safeHtml(s.tip) + '</div>' +
+      '</div>' +
+      // Toggle
+      '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">' +
+        '<span style="font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Enable</span>' +
+        '<button class="toggle ' + (enabled ? 'on' : '') + '" id="' + toggleId + '" onclick="this.classList.toggle(\'on\')" title="Toggle slot"></button>' +
+      '</div>' +
+    '</div>' +
+    // Code textarea
+    '<div style="margin-bottom:10px">' +
+      '<label style="display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:5px">' +
+        '<span>Ad Code</span>' +
+        '<span style="color:' + (hasCode ? 'var(--green)' : 'var(--muted)') + '">' + (hasCode ? '✓ ' + adCode.trim().length + ' chars — live AdSense code set' : 'Empty - slot stays hidden') + '</span>' +
+      '</label>' +
+      '<textarea id="' + codeId + '" rows="3" ' +
+        'style="font-family:monospace;font-size:11.5px;background:#fafafa;border:2px solid ' + (hasCode ? 'var(--green)' : 'var(--gray2)') + ';border-radius:8px;width:100%;padding:10px;resize:vertical;outline:none;transition:border-color .2s" ' +
+        'placeholder="Paste your Google AdSense, Media.net, or any &lt;script&gt; / &lt;ins&gt; code here…" ' +
+        'onfocus="this.style.borderColor=\'var(--red)\'" ' +
+        'onblur="this.style.borderColor=(this.value.trim()?\'var(--green)\':\'var(--gray2)\')"' +
+      '>' + safeHtml(adCode) + '</textarea>' +
+    '</div>' +
+    // Actions row — use data attributes on buttons so we don't embed key in inline JS
+    '<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">' +
+      '<button class="btn btn-red" data-ad-key="' + safeHtml(s.key) + '" onclick="window.adMgr.saveSlot(this.dataset.adKey)">💾 Save Slot</button>' +
+      (hasCode ? '<button class="btn btn-danger" data-ad-key="' + safeHtml(s.key) + '" onclick="window.adMgr.clearSlot(this.dataset.adKey)">✕ Clear Code</button>' : '') +
+      '<code style="margin-left:auto;background:#f4f4f4;padding:3px 9px;border-radius:6px;font-size:11px;color:var(--muted)">' + safeHtml(s.key) + '</code>' +
+    '</div>' +
+  '</div>';
 }
 
-// Ad Manager public API
-const adMgr = {
-  saveSlot(key) {
-    const slots   = loadAdSlots();
-    const codeEl  = document.getElementById('adcode-' + key);
-    const toggleEl= document.getElementById('adtoggle-' + key);
-    if (!codeEl) return;
-    slots[key] = { enabled: toggleEl ? toggleEl.classList.contains('on') : true, adCode: codeEl.value };
+// ─── Public API ──────────────────────────────────────────────────────────────
+// Using window.adMgr so inline onclick handlers always find it.
+window.adMgr = {
+  saveSlot: function(key) {
+    var slots    = loadAdSlots();
+    var codeEl   = document.getElementById('adcode-'   + key);
+    var toggleEl = document.getElementById('adtoggle-' + key);
+    if (!codeEl) { showToast('Slot "' + key + '" not found.', 'error'); return; }
+    slots[key] = {
+      enabled: toggleEl ? toggleEl.classList.contains('on') : true,
+      adCode:  codeEl.value
+    };
     persistAdSlots(slots);
     showToast('"' + key + '" saved!');
     renderAdManager();
+    renderDashboard();
   },
 
-  saveAll() {
-    const slots = loadAdSlots();
-    ALL_AD_SLOTS.forEach(s => {
-      const codeEl  = document.getElementById('adcode-' + s.key);
-      const toggleEl= document.getElementById('adtoggle-' + s.key);
+  saveAll: function() {
+    var slots = loadAdSlots();
+    ALL_AD_SLOTS.forEach(function(s) {
+      var codeEl   = document.getElementById('adcode-'   + s.key);
+      var toggleEl = document.getElementById('adtoggle-' + s.key);
       if (!codeEl) return;
-      slots[s.key] = { enabled: toggleEl ? toggleEl.classList.contains('on') : true, adCode: codeEl.value };
+      slots[s.key] = {
+        enabled: toggleEl ? toggleEl.classList.contains('on') : true,
+        adCode:  codeEl.value
+      };
     });
     persistAdSlots(slots);
     showToast('All ' + ALL_AD_SLOTS.length + ' slots saved!');
@@ -1497,74 +1833,85 @@ const adMgr = {
     renderDashboard();
   },
 
-  clearSlot(key) {
-    if (!confirm('Clear ad code for "' + key + '"?\nSlot will show a styled native placeholder.')) return;
-    const slots = loadAdSlots();
+  clearSlot: function(key) {
+    if (!confirm('Clear ad code for "' + key + '"?\nThis placement will stay hidden until new AdSense code is saved.')) return;
+    var slots = loadAdSlots();
     if (slots[key]) { slots[key].adCode = ''; slots[key].enabled = true; }
     persistAdSlots(slots);
-    showToast('Slot cleared — showing native placeholder.', 'warn');
+    showToast('Slot cleared.', 'warn');
     renderAdManager();
+    renderDashboard();
   },
 
-  enableAll() {
-    const slots = loadAdSlots();
-    ALL_AD_SLOTS.forEach(s => { if (slots[s.key]) slots[s.key].enabled = true; });
+  enableAll: function() {
+    var slots = loadAdSlots();
+    ALL_AD_SLOTS.forEach(function(s) { if (slots[s.key]) slots[s.key].enabled = true; });
     persistAdSlots(slots);
     showToast('All slots enabled.');
     renderAdManager();
+    renderDashboard();
   },
 
-  disableAll() {
+  disableAll: function() {
     if (!confirm('Disable all ad slots? The site will show no ads.')) return;
-    const slots = loadAdSlots();
-    ALL_AD_SLOTS.forEach(s => { if (slots[s.key]) slots[s.key].enabled = false; });
+    var slots = loadAdSlots();
+    ALL_AD_SLOTS.forEach(function(s) { if (slots[s.key]) slots[s.key].enabled = false; });
     persistAdSlots(slots);
     showToast('All slots disabled.', 'warn');
     renderAdManager();
+    renderDashboard();
   },
 
-  clearAll() {
-    if (!confirm('Clear ALL ad code from every slot?\nAll slots will revert to styled native placeholders.')) return;
-    const slots = loadAdSlots();
-    ALL_AD_SLOTS.forEach(s => { if (slots[s.key]) slots[s.key].adCode = ''; });
+  clearAll: function() {
+    if (!confirm('Clear ALL ad code from every slot?\nAll placements without code will stay hidden.')) return;
+    var slots = loadAdSlots();
+    ALL_AD_SLOTS.forEach(function(s) { if (slots[s.key]) slots[s.key].adCode = ''; });
     persistAdSlots(slots);
     showToast('All ad code cleared.', 'warn');
     renderAdManager();
+    renderDashboard();
   },
 
-  exportConfig() {
-    const cfg  = loadAdSlots();
-    const blob = new Blob([JSON.stringify(cfg, null, 2)], { type:'application/json' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
+  exportConfig: function() {
+    var cfg  = loadAdSlots();
+    var blob = new Blob([JSON.stringify(cfg, null, 2)], { type:'application/json' });
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
     a.href = url;
     a.download = 'examready-ads-' + new Date().toISOString().slice(0,10) + '.json';
     a.click();
-    setTimeout(() => URL.revokeObjectURL(url), 3000);
+    setTimeout(function() { URL.revokeObjectURL(url); }, 3000);
     showToast('Ad config exported!');
   },
 
-  importConfig(input) {
-    const f = input.files[0]; if (!f) return;
-    const reader = new FileReader();
-    reader.onload = e => {
+  importConfig: function(input) {
+    var f = input.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
       try {
-        const data = JSON.parse(e.target.result);
-        if (typeof data !== 'object' || Array.isArray(data)) { showToast('Invalid format.','error'); return; }
+        var data = JSON.parse(e.target.result);
+        if (typeof data !== 'object' || Array.isArray(data)) { showToast('Invalid format.', 'error'); return; }
         persistAdSlots(data);
         showToast('Ad config imported!');
         renderAdManager();
-      } catch(err) { showToast('Could not parse JSON.','error'); }
+        renderDashboard();
+      } catch(err) { showToast('Could not parse JSON.', 'error'); }
     };
     reader.readAsText(f);
     input.value = '';
   },
 };
+// Also expose renderAdManager globally so it can be called from showSection
+window.renderAdManager = renderAdManager;
 
 // ============================================================
 // INIT
 // ============================================================
 function initAdmin() {
+  bindAdminSessionRefresh();
+  touchAdminSession();
+  warnIfUsingDefaultAdminPassword();
   updateSubjectOptions('pdfSubject','pdfClass');
   updateSubjectOptions('quizSubject','quizClass');
   populateQuizSubjectFilter();
@@ -1583,13 +1930,24 @@ function initAdmin() {
 // ============================================================
 // BOOT
 // ============================================================
-window.addEventListener('DOMContentLoaded', () => {
-  if (sessionStorage.getItem('er_admin_auth') === '1') {
+window.addEventListener('DOMContentLoaded', async () => {
+  try { await ensureAdminPasswordHash(); }
+  catch (error) {
+    showLockoutBar('Secure admin login is unavailable in this browser.');
+    const btn = document.getElementById('authSubmitBtn');
+    if (btn) btn.disabled = true;
+    return;
+  }
+
+  syncLockoutState();
+  if (hasValidAdminSession()) {
     document.getElementById('authGate').style.display = 'none';
     initAdmin();
   }
   document.getElementById('authPass')?.addEventListener('keydown', e => { if(e.key==='Enter')doLogin(); });
 });
 </script>
+  <script src="adfix_patch.js"></script>
+  <script src="content-ads-admin.js"></script>
 </body>
 </html>

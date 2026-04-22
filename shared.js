@@ -271,6 +271,112 @@ function getAllQuizEntries() {
   return all;
 }
 
+const SAFE_LOCAL_FILE_RE = /^[A-Za-z0-9._ -]+$/;
+const SAFE_COLOR_RE = /^#(?:[0-9a-f]{3}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
+const SAFE_DATA_IMAGE_RE = /^data:image\/(?:png|jpe?g|webp|gif|bmp|x-icon|vnd\.microsoft\.icon);base64,[a-z0-9+/=\s]+$/i;
+const SAFE_DATA_FILE_RE = /^data:(?:application\/pdf|application\/msword|application\/vnd\.openxmlformats-officedocument\.wordprocessingml\.document);base64,[a-z0-9+/=\s]+$/i;
+
+function sanitizeStoredFileName(name) {
+  const value = String(name || '').trim();
+  return SAFE_LOCAL_FILE_RE.test(value) ? value : '';
+}
+
+function isSafeRelativeUrl(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return false;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(raw)) return false;
+  if (/^\/\//.test(raw)) return false;
+  if (/[\u0000-\u001F\u007F<>"'`\\\s]/.test(raw)) return false;
+  return true;
+}
+
+function sanitizeUrlValue(rawValue, options = {}) {
+  const {
+    fallback = '#',
+    allowRelative = true,
+    allowHash = true,
+    allowHttp = true,
+    allowMailto = false,
+    allowTel = false,
+    allowLocalToken = false,
+    allowImageData = false,
+    allowFileData = false,
+    allowBlob = false
+  } = options;
+
+  const value = String(rawValue ?? '').trim();
+  if (!value) return fallback;
+  if (/[\u0000-\u001F\u007F]/.test(value)) return fallback;
+
+  if (allowLocalToken && value.startsWith('local:')) {
+    return sanitizeStoredFileName(value.slice(6)) ? value : fallback;
+  }
+  if (allowImageData && SAFE_DATA_IMAGE_RE.test(value)) return value;
+  if (allowFileData && SAFE_DATA_FILE_RE.test(value)) return value;
+  if (allowHash && value.startsWith('#')) return value;
+  if (allowRelative && isSafeRelativeUrl(value)) return value;
+  if (/^\/\//.test(value)) return fallback;
+
+  try {
+    const parsed = new URL(value, window.location.href);
+    const protocol = parsed.protocol.toLowerCase();
+    if (allowHttp && (protocol === 'http:' || protocol === 'https:')) return parsed.href;
+    if (allowMailto && protocol === 'mailto:') return value;
+    if (allowTel && protocol === 'tel:') return value;
+    if (allowBlob && protocol === 'blob:') return parsed.href;
+  } catch(e) {}
+
+  return fallback;
+}
+
+function sanitizeNavigationUrl(value, fallback = '') {
+  return sanitizeUrlValue(value, {
+    fallback,
+    allowRelative: true,
+    allowHash: false,
+    allowHttp: true
+  });
+}
+
+function sanitizeAnnouncementUrl(value, fallback = '') {
+  return sanitizeUrlValue(value, {
+    fallback,
+    allowRelative: true,
+    allowHash: false,
+    allowHttp: true,
+    allowMailto: true,
+    allowTel: true
+  });
+}
+
+function sanitizeResourceUrl(value, fallback = '#') {
+  return sanitizeUrlValue(value, {
+    fallback,
+    allowRelative: true,
+    allowHash: false,
+    allowHttp: true,
+    allowLocalToken: true,
+    allowFileData: true,
+    allowBlob: true
+  });
+}
+
+function sanitizeImageAssetUrl(value, fallback = 'logo.png') {
+  return sanitizeUrlValue(value, {
+    fallback,
+    allowRelative: true,
+    allowHash: false,
+    allowHttp: true,
+    allowImageData: true,
+    allowBlob: true
+  });
+}
+
+function sanitizeCssColor(value, fallback = '#e8211a') {
+  const raw = String(value || '').trim();
+  return SAFE_COLOR_RE.test(raw) ? raw : fallback;
+}
+
 function findQuizById(quizId) {
   if (!quizId) return null;
   return getAllQuizEntries().find(q => q.id === quizId) || null;
@@ -279,10 +385,11 @@ function findQuizById(quizId) {
 function getResolvedFileUrl(url) {
   if (!url) return '#';
   if (url.startsWith('local:')) {
-    const fileName = url.slice(6);
-    return localStorage.getItem('er_file_' + fileName) || '#';
+    const fileName = sanitizeStoredFileName(url.slice(6));
+    if (!fileName) return '#';
+    return sanitizeResourceUrl(localStorage.getItem('er_file_' + fileName) || '#');
   }
-  return url;
+  return sanitizeResourceUrl(url);
 }
 
 function getPreviewEmbedUrl(url) {
@@ -301,7 +408,9 @@ function getPreviewEmbedUrl(url) {
 function buildPdfPreviewUrl(itemOrUrl, title) {
   const rawUrl   = typeof itemOrUrl === 'string' ? itemOrUrl : (itemOrUrl?.url || '#');
   const rawTitle = title || itemOrUrl?.name || 'PDF Preview';
-  return `pdf-viewer.html?title=${encodeURIComponent(rawTitle)}&url=${encodeURIComponent(rawUrl)}`;
+  const safeUrl = sanitizeResourceUrl(rawUrl, '');
+  if (!safeUrl) return '#';
+  return `pdf-viewer.html?title=${encodeURIComponent(rawTitle)}&url=${encodeURIComponent(safeUrl)}`;
 }
 
 function addFooterLegalLinks() {
@@ -346,7 +455,7 @@ function addFooterLegalLinks() {
 }
 
 function applyFooterBranding() {
-  const footerBrandLogo = localStorage.getItem('er_footer_brand_logo') || 'footer-brand-logo.png';
+  const footerBrandLogo = sanitizeImageAssetUrl(localStorage.getItem('er_footer_brand_logo') || 'footer-brand-logo.png', 'footer-brand-logo.png');
   document.querySelectorAll('.footer-brand').forEach(brand => {
     let brandMark = brand.querySelector('.footer-brand-mark');
     if (!brandMark) {
@@ -357,7 +466,12 @@ function applyFooterBranding() {
       brandMark.style.marginBottom = '14px';
       brand.insertBefore(brandMark, brand.firstChild);
     }
-    brandMark.innerHTML = `<img src="${footerBrandLogo}" alt="ExamReady" style="display:block;width:min(100%, 260px);height:auto;object-fit:contain;">`;
+    brandMark.textContent = '';
+    const img = document.createElement('img');
+    img.src = footerBrandLogo;
+    img.alt = 'ExamReady';
+    img.style.cssText = 'display:block;width:min(100%, 260px);height:auto;object-fit:contain;';
+    brandMark.appendChild(img);
   });
 }
 
@@ -442,6 +556,12 @@ function initResponsiveNav() {
 
   toggle.removeAttribute('onclick');
   toggle.onclick = window.toggleMenu;
+  toggle.onkeydown = event => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      window.toggleMenu();
+    }
+  };
 
   nav.querySelectorAll('a').forEach(link => {
     link.addEventListener('click', closeNav);
@@ -466,12 +586,31 @@ function initResponsiveNav() {
 
 // ===== SITE CONFIG =====
 function getSiteConfig() {
-  try { return JSON.parse(localStorage.getItem('er_site_config') || '{}'); } catch(e) { return {}; }
+  try {
+    const raw = JSON.parse(localStorage.getItem('er_site_config') || '{}') || {};
+    return {
+      ...raw,
+      siteName: String(raw.siteName || '').trim().slice(0, 80),
+      siteTagline: String(raw.siteTagline || '').trim().slice(0, 240),
+      colorAccent: sanitizeCssColor(raw.colorAccent, '#e8211a'),
+      colorBg: sanitizeCssColor(raw.colorBg, '#0d0d0d'),
+      heroBtnUrl: sanitizeAnnouncementUrl(raw.heroBtnUrl || '', '')
+    };
+  } catch(e) { return {}; }
 }
 
 // ===== ANNOUNCEMENT =====
 function getAnnouncement() {
-  try { return JSON.parse(localStorage.getItem('er_announcement') || 'null'); } catch(e) { return null; }
+  try {
+    const raw = JSON.parse(localStorage.getItem('er_announcement') || 'null');
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+    return {
+      text: String(raw.text || '').trim().slice(0, 240),
+      color: sanitizeCssColor(raw.color, '#e8211a'),
+      enabled: raw.enabled !== false,
+      link: sanitizeAnnouncementUrl(raw.link || '', '')
+    };
+  } catch(e) { return null; }
 }
 
 // ===== FEATURES =====
@@ -484,11 +623,197 @@ function isFeatureEnabled(key) {
 }
 
 // ===== NAV =====
+const DEFAULT_NAV_ITEMS = [
+  { label: 'Home',           url: 'index.html' },
+  { label: 'Class 9',        url: 'class9.html' },
+  { label: 'Class 10',       url: 'class10.html' },
+  { label: 'Class 11',       url: 'class11.html' },
+  { label: 'Class 12',       url: 'class12.html' },
+  { label: 'Solutions',      url: 'solutions.html' },
+  { label: 'Notes',          url: 'notes.html' },
+  { label: 'PYQs',           url: 'pyq.html' },
+  { label: 'Question Banks', url: 'questionbank.html' },
+  { label: 'Quizzes',        url: 'quizzes.html' }
+];
+
+const SHARED_FOOTER_LINKS = {
+  classes: [
+    { label: 'Class 9',  url: 'class9.html' },
+    { label: 'Class 10', url: 'class10.html' },
+    { label: 'Class 11', url: 'class11.html' },
+    { label: 'Class 12', url: 'class12.html' }
+  ],
+  resources: [
+    { label: 'Solutions',      url: 'solutions.html' },
+    { label: 'Short Notes',    url: 'notes.html' },
+    { label: 'PYQ Papers',     url: 'pyq.html' },
+    { label: 'Question Banks', url: 'questionbank.html' },
+    { label: 'Quizzes',        url: 'quizzes.html' }
+  ],
+  legal: [
+    { label: 'Privacy Policy',     url: 'privacy.html' },
+    { label: 'Terms & Conditions', url: 'terms.html' },
+    { label: 'Disclaimer',         url: 'disclaimer.html' }
+  ]
+};
+
+function getCurrentPageName() {
+  return window.location.pathname.split('/').pop() || 'index.html';
+}
+
+function getDefaultNavItems() {
+  return DEFAULT_NAV_ITEMS.map(item => ({ ...item }));
+}
+
+function normalizeNavItems(items) {
+  if (!Array.isArray(items)) return getDefaultNavItems();
+  const normalized = items
+    .map(item => ({
+      label: String(item?.label || '').replace(/\s+/g, ' ').trim().slice(0, 60),
+      url: sanitizeNavigationUrl(item?.url || '', '')
+    }))
+    .filter(item => item.label && item.url);
+  return normalized.length ? normalized : getDefaultNavItems();
+}
+
+function resolveCurrentNavTarget() {
+  const current = getCurrentPageName();
+  const params = new URLSearchParams(window.location.search);
+  const aliases = {
+    'note-post.html': 'notes.html',
+    'quiz.html': 'quizzes.html',
+    'solution-post.html': 'solutions.html'
+  };
+
+  if (aliases[current]) return aliases[current];
+
+  if (current === 'subject.html' || current === 'chapter.html') {
+    const cls = params.get('class');
+    if (['9', '10', '11', '12'].includes(cls)) return `class${cls}.html`;
+  }
+
+  if (current === 'pdf-viewer.html') {
+    try {
+      if (document.referrer) {
+        const refUrl = new URL(document.referrer);
+        if (refUrl.origin === window.location.origin) {
+          const refPage = refUrl.pathname.split('/').pop() || '';
+          if (aliases[refPage]) return aliases[refPage];
+          if (refPage === 'subject.html' || refPage === 'chapter.html') {
+            const refCls = refUrl.searchParams.get('class');
+            if (['9', '10', '11', '12'].includes(refCls)) return `class${refCls}.html`;
+          }
+          return refPage;
+        }
+      }
+    } catch(e) {}
+  }
+
+  return current;
+}
+
 function getNavItems() {
   try {
     const raw = localStorage.getItem('er_nav');
-    return raw ? JSON.parse(raw) : null;
-  } catch(e) { return null; }
+    return raw ? normalizeNavItems(JSON.parse(raw)) : getDefaultNavItems();
+  } catch(e) { return getDefaultNavItems(); }
+}
+
+function buildSharedHeaderMarkup() {
+  const logo = sanitizeImageAssetUrl(localStorage.getItem('er_logo') || 'logo.png', 'logo.png');
+  const navItems = getNavItems();
+  const activeUrl = resolveCurrentNavTarget();
+  const navHtml = navItems.map(item => {
+    const isActive = item.url === activeUrl;
+    return `<a href="${escapeHtml(item.url)}"${isActive ? ' class="active"' : ''}>${escapeHtml(item.label)}</a>`;
+  }).join('');
+
+  return `
+    <a class="logo-wrap" href="index.html">
+      <img src="${escapeHtml(logo)}" alt="ExamReady" class="logo-img" style="height:44px;">
+    </a>
+    <nav id="mainNav">
+      ${navHtml}
+    </nav>
+    <div class="hamburger" onclick="toggleMenu()" role="button" tabindex="0" aria-label="Open navigation menu">
+      <span></span><span></span><span></span>
+    </div>
+  `;
+}
+
+function buildFooterLinks(items) {
+  return items.map(item => {
+    const safeUrl = sanitizeNavigationUrl(item.url, '#');
+    return `<a href="${escapeHtml(safeUrl)}">${escapeHtml(item.label)}</a>`;
+  }).join('');
+}
+
+function buildSharedFooterMarkup() {
+  const config = getSiteConfig();
+  const siteName = escapeHtml((config.siteName || 'ExamReady').trim() || 'ExamReady');
+  const siteTagline = escapeHtml(
+    (config.siteTagline || 'Free study resources for CBSE students in Class 9 to 12. Notes, PYQs, question banks, quizzes, and solutions - all free.').trim()
+  );
+  const year = new Date().getFullYear();
+
+  return `
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <div class="footer-brand-mark"></div>
+          <p>${siteTagline}</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-col">
+            <h4>Classes</h4>
+            ${buildFooterLinks(SHARED_FOOTER_LINKS.classes)}
+          </div>
+          <div class="footer-col">
+            <h4>Resources</h4>
+            ${buildFooterLinks(SHARED_FOOTER_LINKS.resources)}
+          </div>
+          <div class="footer-col" data-legal-links="true">
+            <h4>Legal</h4>
+            ${buildFooterLinks(SHARED_FOOTER_LINKS.legal)}
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; ${year} ${siteName}. Made with <span>&hearts;</span> for students.</p>
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <p>CBSE Resources for Class 9-12</p>
+          <div data-social-icons="true" style="display:flex;align-items:center;gap:12px;">
+            <a href="https://www.instagram.com/examready.co/" target="_blank" rel="noopener noreferrer" title="Follow us on Instagram"
+              style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;text-decoration:none;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+            </a>
+            <a href="https://www.youtube.com/@EXAMREADY_STUDY" target="_blank" rel="noopener noreferrer" title="Subscribe on YouTube"
+              style="display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:10px;background:#ff0000;color:#fff;text-decoration:none;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function syncSharedSiteChrome() {
+  const header = document.querySelector('header');
+  if (header) {
+    header.innerHTML = buildSharedHeaderMarkup();
+    header.setAttribute('data-er-shared-header', 'true');
+  }
+
+  if (getCurrentPageName() === 'pdf-viewer.html') return;
+
+  let footer = document.querySelector('footer');
+  if (!footer) {
+    footer = document.createElement('footer');
+    document.body.appendChild(footer);
+  }
+  footer.innerHTML = buildSharedFooterMarkup();
+  footer.setAttribute('data-er-shared-footer', 'true');
 }
 
 // ===== APPLY SITE CONFIG TO PAGE =====
@@ -498,7 +823,7 @@ function applySiteConfig() {
   if (config.colorAccent) document.documentElement.style.setProperty('--red', config.colorAccent);
   if (config.colorBg)    document.documentElement.style.setProperty('--black', config.colorBg);
 
-  const logo = localStorage.getItem('er_logo');
+  const logo = sanitizeImageAssetUrl(localStorage.getItem('er_logo') || '', '');
   if (logo) {
     document.querySelectorAll('img[alt="ExamReady"], img.logo-img').forEach(img => { img.src = logo; });
   }
@@ -507,7 +832,7 @@ function applySiteConfig() {
   if (navItems && Array.isArray(navItems)) {
     const nav = document.getElementById('mainNav');
     if (nav) {
-      const current = window.location.pathname.split('/').pop() || 'index.html';
+      const current = resolveCurrentNavTarget();
       nav.innerHTML = navItems.map(item => {
         const isActive = item.url === current;
         return `<a href="${escapeHtml(item.url)}"${isActive ? ' class="active"' : ''}>${escapeHtml(item.label)}</a>`;
@@ -519,21 +844,54 @@ function applySiteConfig() {
   if (ann && ann.enabled && ann.text) {
     const bar = document.createElement('div');
     bar.id = 'siteAnnouncement';
-    bar.style.cssText = `background:${escapeHtml(ann.color || '#e8211a')};color:#fff;padding:10px 20px;text-align:center;font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;gap:12px;position:relative;z-index:999`;
+    bar.style.background = ann.color || '#e8211a';
+    bar.style.color = '#fff';
+    bar.style.fontFamily = "'Nunito',sans-serif";
+    bar.style.fontWeight = '700';
+    bar.style.fontSize = '13px';
+    bar.style.display = 'flex';
+    bar.style.alignItems = 'center';
+    bar.style.overflow = 'hidden';
+    bar.style.position = 'relative';
+    bar.style.zIndex = '999';
+    bar.style.padding = '10px 0';
+
+    if (!document.getElementById('er-ticker-style')) {
+      const style = document.createElement('style');
+      style.id = 'er-ticker-style';
+      style.textContent = `
+        @keyframes er-ticker {
+          0%   { transform: translateX(100vw); }
+          100% { transform: translateX(-100%); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
+
+    const tickerWrap = document.createElement('div');
+    tickerWrap.style.cssText = 'flex:1;overflow:hidden;position:relative;';
 
     const textNode = document.createTextNode(ann.text);
+
+    let inner;
     if (ann.link) {
-      const a = document.createElement('a');
-      a.href = ann.link;
-      a.style.cssText = 'color:#fff;text-decoration:none;flex:1';
-      a.appendChild(textNode);
-      bar.appendChild(a);
+      inner = document.createElement('a');
+      inner.href = ann.link;
+      inner.rel = 'noopener noreferrer';
+      inner.style.cssText = 'color:#fff;text-decoration:none;';
     } else {
-      const span = document.createElement('span');
-      span.style.flex = '1';
-      span.appendChild(textNode);
-      bar.appendChild(span);
+      inner = document.createElement('span');
     }
+    inner.style.cssText += `
+      display: inline-block;
+      white-space: nowrap;
+      animation: er-ticker 22s linear infinite;
+      padding-right: 80px;
+    `;
+    inner.appendChild(textNode);
+    tickerWrap.appendChild(inner);
+    bar.appendChild(tickerWrap);
+
     const closeBtn = document.createElement('button');
     closeBtn.style.cssText = 'background:none;border:none;color:#fff;font-size:18px;cursor:pointer;opacity:.8;flex-shrink:0';
     closeBtn.textContent = '×';
@@ -544,6 +902,67 @@ function applySiteConfig() {
     if (header) header.insertAdjacentElement('afterend', bar);
     else document.body.insertBefore(bar, document.body.firstChild);
   }
+}
+
+function collectHardeningTargets(root, selector) {
+  const nodes = [];
+  if (!root) return nodes;
+  if (root.nodeType === 1 && typeof root.matches === 'function' && root.matches(selector)) {
+    nodes.push(root);
+  }
+  if (typeof root.querySelectorAll === 'function') {
+    root.querySelectorAll(selector).forEach(node => nodes.push(node));
+  }
+  return nodes;
+}
+
+function applySecurityHardening(root = document) {
+  const scope = root.nodeType === 9 ? (root.documentElement || root.body || root) : root;
+  if (!scope) return;
+
+  collectHardeningTargets(scope, 'a[target="_blank"]').forEach(link => {
+    link.rel = 'noopener noreferrer';
+    link.referrerPolicy = 'strict-origin-when-cross-origin';
+  });
+
+  collectHardeningTargets(scope, 'a[href]').forEach(link => {
+    const rawHref = link.getAttribute('href') || '';
+    const safeHref = sanitizeUrlValue(rawHref, {
+      fallback: '#',
+      allowRelative: true,
+      allowHash: true,
+      allowHttp: true,
+      allowMailto: true,
+      allowTel: true,
+      allowFileData: link.hasAttribute('download')
+    });
+    if (safeHref !== rawHref) {
+      link.setAttribute('href', safeHref || '#');
+    }
+  });
+
+  collectHardeningTargets(scope, 'iframe').forEach(frame => {
+    if (!frame.getAttribute('referrerpolicy')) {
+      frame.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+    }
+    if (!frame.getAttribute('loading')) {
+      frame.setAttribute('loading', 'lazy');
+    }
+  });
+}
+
+let erSecurityObserverStarted = false;
+function initSecurityHardeningObserver() {
+  if (erSecurityObserverStarted || typeof MutationObserver === 'undefined' || !document.documentElement) return;
+  erSecurityObserverStarted = true;
+  const observer = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+      mutation.addedNodes.forEach(node => {
+        if (node.nodeType === 1) applySecurityHardening(node);
+      });
+    });
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
 }
 
 // ===== SOLUTION POSTS =====
@@ -669,12 +1088,10 @@ function formatSolutionContent(content) {
   }).join('');
 }
 
-// ===== AD SYSTEM =====
-// ─────────────────────────────────────────────────────────────────────────────
-// MASTER SLOT REGISTRY
-// Single source of truth for ALL ad slots across shared.js AND ads.js.
-// Admin writes to er_ad_slots; both systems read from the same storage.
-// ─────────────────────────────────────────────────────────────────────────────
+// ===== AD SYSTEM — FIXED VERSION =====
+// Replaces the entire "AD SYSTEM" block in shared.js
+// All 17 admin slots are registered; injection key aliases are resolved.
+
 const AD_SLOT_REGISTRY = {
   // ── Global — All Pages ──
   top:              { label:'Top Banner (shared.js)',          enabled:true, adCode:'' },
@@ -695,6 +1112,7 @@ const AD_SLOT_REGISTRY = {
   results_banner:   { label:'Results Banner (ads.js)',         enabled:true, adCode:'' },
   solution_mid:     { label:'Mid-Article (ads.js)',            enabled:true, adCode:'' },
   quiz_sidebar:     { label:'Quiz Sidebar (ads.js)',           enabled:true, adCode:'' },
+  pdf_viewer:       { label:'PDF Viewer Banner',               enabled:true, adCode:'' },
 
   // ── Sticky / Persistent ──
   sticky:           { label:'Sticky Sidebar (shared.js)',      enabled:true, adCode:'' },
@@ -702,19 +1120,14 @@ const AD_SLOT_REGISTRY = {
   mobile_bottom:    { label:'Mobile Sticky Bottom Bar',        enabled:true, adCode:'' },
 };
 
-/**
- * getAdSlots() — returns ALL known slots merged with admin-saved values.
- * Any slot key saved by admin is included even if not in the registry.
- */
 function getAdSlots() {
   try {
     const saved = JSON.parse(localStorage.getItem('er_ad_slots') || '{}');
     const merged = {};
-    // Start with registry defaults
     Object.entries(AD_SLOT_REGISTRY).forEach(([k, defaults]) => {
       merged[k] = { ...defaults, ...(saved[k] || {}) };
     });
-    // Also include any extra slots admin may have saved (future-proof)
+    // Include any extra slots admin may have added
     Object.entries(saved).forEach(([k, v]) => {
       if (!merged[k]) merged[k] = { enabled: true, adCode: '', label: k, ...v };
     });
@@ -728,7 +1141,6 @@ function saveAdSlots(slots) {
   localStorage.setItem('er_ad_slots', JSON.stringify(slots));
 }
 
-// ─── Slot helpers ───────────────────────────────────────────────────────────
 function _slotEnabled(slots, key) {
   return slots[key]?.enabled !== false;
 }
@@ -737,17 +1149,15 @@ function _slotCode(slots, key) {
   return (slots[key]?.adCode || '').trim();
 }
 
-// ─── Inject real ad code (or nothing if no code) ────────────────────────────
 function _buildAdElement(slots, key, wrapperClass) {
   if (!_slotEnabled(slots, key)) return null;
   const code = _slotCode(slots, key);
-  if (!code) return null;         // No placeholder noise — only inject real ads
+  if (!code) return null;
 
   const wrap = document.createElement('div');
   wrap.dataset.erAdSlot = key;
   wrap.className = wrapperClass || 'er-ad-shell';
   wrap.innerHTML = code;
-  // Re-execute any scripts inside the ad code
   wrap.querySelectorAll('script').forEach(old => {
     const s = document.createElement('script');
     Array.from(old.attributes).forEach(a => s.setAttribute(a.name, a.value));
@@ -757,7 +1167,6 @@ function _buildAdElement(slots, key, wrapperClass) {
   return wrap;
 }
 
-/** getManagedAdSlotHtml — inline HTML string for pages that use template literals */
 function getManagedAdSlotHtml(key) {
   const slots = getAdSlots();
   if (!_slotEnabled(slots, key)) return '';
@@ -766,9 +1175,31 @@ function getManagedAdSlotHtml(key) {
   return `<div data-er-ad-slot="${escapeHtml(key)}" class="er-ad-shell">${code}</div>`;
 }
 
-// ─── Sticky Sidebar (desktop ≥1280px) ───────────────────────────────────────
+function _hasManagedAdSlot(...keys) {
+  return keys.some(key => !!document.querySelector(`[data-er-ad-slot="${key}"],[data-ad-slot="${key}"]`));
+}
+
+function _injectPdfViewerSlot(slots) {
+  const key = 'pdf_viewer';
+  if (!_slotEnabled(slots, key)) return;
+  if (!_slotCode(slots, key)) return;
+  if (_hasManagedAdSlot(key)) return;
+
+  const viewer = document.getElementById('pdfViewerArea') || document.getElementById('fallbackWrap');
+  if (!viewer) return;
+
+  const wrap = _buildAdElement(slots, key, 'er-ad-shell er-ad-shell--pdf-viewer er-pdf-ad-slot');
+  if (!wrap) return;
+  wrap.style.cssText = 'max-width:1200px;margin:12px auto;padding:0 18px;width:100%;box-sizing:border-box;flex-shrink:0;';
+  viewer.insertAdjacentElement('beforebegin', wrap);
+
+  if (typeof window.resizeViewer === 'function') {
+    setTimeout(() => window.resizeViewer(), 0);
+  }
+}
+
 function _injectStickySidebar(slots) {
-  // Use 'sticky' key (shared.js canonical); fall back to 'sidebar_sticky' (ads.js key)
+  // Try shared key 'sticky' first, fall back to ads.js alias 'sidebar_sticky'
   const key = _slotCode(slots, 'sticky') ? 'sticky' : 'sidebar_sticky';
   if (!_slotEnabled(slots, key)) return;
   const code = _slotCode(slots, key);
@@ -787,8 +1218,7 @@ function _injectStickySidebar(slots) {
   closeBtn.textContent = '✕';
   closeBtn.setAttribute('aria-label', 'Close ad');
   closeBtn.onclick = () => {
-    wrap.style.opacity = '0';
-    wrap.style.pointerEvents = 'none';
+    wrap.style.opacity = '0'; wrap.style.pointerEvents = 'none';
     sessionStorage.setItem('er_sticky_dismissed', '1');
     setTimeout(() => wrap.remove(), 420);
   };
@@ -806,22 +1236,13 @@ function _injectStickySidebar(slots) {
   });
 
   document.body.appendChild(wrap);
-
-  setTimeout(() => {
-    wrap.style.opacity = '1';
-    wrap.style.pointerEvents = 'auto';
-  }, 2000);
-
+  setTimeout(() => { wrap.style.opacity = '1'; wrap.style.pointerEvents = 'auto'; }, 2000);
   window.addEventListener('scroll', () => {
     if (sessionStorage.getItem('er_sticky_dismissed') === '1') return;
-    if (window.scrollY > 300) {
-      wrap.style.opacity = '1';
-      wrap.style.pointerEvents = 'auto';
-    }
+    if (window.scrollY > 300) { wrap.style.opacity = '1'; wrap.style.pointerEvents = 'auto'; }
   }, { passive: true });
 }
 
-// ─── Mobile Sticky Bottom Bar ────────────────────────────────────────────────
 function _injectMobileBottom(slots) {
   const key = 'mobile_bottom';
   if (!_slotEnabled(slots, key)) return;
@@ -837,21 +1258,15 @@ function _injectMobileBottom(slots) {
   bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:1300;background:#fff;border-top:1px solid #e8e8ea;box-shadow:0 -4px 24px rgba(0,0,0,0.12);transform:translateY(100%);transition:transform .4s cubic-bezier(.22,1,.36,1);pointer-events:none;';
 
   const inner = document.createElement('div');
-  inner.style.cssText = 'display:flex;align-items:center;padding:8px 12px;gap:10px;min-height:56px;max-width:100%;overflow:hidden;';
-
-  const contentWrap = document.createElement('div');
-  contentWrap.style.flex = '1';
-  const label = document.createElement('div');
-  label.style.cssText = 'font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:#bbb;line-height:1;margin-bottom:2px;';
-  label.textContent = 'Sponsored';
-  contentWrap.appendChild(label);
-  const adInner = document.createElement('div');
-  adInner.innerHTML = code;
-  contentWrap.appendChild(adInner);
-  inner.appendChild(contentWrap);
-
+  inner.style.cssText = 'display:flex;align-items:center;padding:8px 12px;gap:10px;min-height:56px;';
+  const lbl = document.createElement('div');
+  lbl.style.cssText = 'font-size:8px;font-weight:900;text-transform:uppercase;letter-spacing:1.5px;color:#bbb;';
+  lbl.textContent = 'Sponsored';
+  const adWrap = document.createElement('div');
+  adWrap.style.flex = '1';
+  adWrap.innerHTML = code;
   const closeBtn = document.createElement('button');
-  closeBtn.style.cssText = 'flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#f0f0f0;border:none;cursor:pointer;font-size:12px;color:#666;display:flex;align-items:center;justify-content:center;';
+  closeBtn.style.cssText = 'flex-shrink:0;width:26px;height:26px;border-radius:50%;background:#f0f0f0;border:none;cursor:pointer;font-size:12px;color:#666;';
   closeBtn.textContent = '✕';
   closeBtn.onclick = () => {
     bar.style.transform = 'translateY(100%)';
@@ -859,26 +1274,22 @@ function _injectMobileBottom(slots) {
     sessionStorage.setItem('er_mba_dismissed', '1');
     setTimeout(() => bar.remove(), 420);
   };
-  inner.appendChild(closeBtn);
+  inner.appendChild(lbl); inner.appendChild(adWrap); inner.appendChild(closeBtn);
   bar.appendChild(inner);
   document.body.appendChild(bar);
 
-  adInner.querySelectorAll('script').forEach(old => {
+  adWrap.querySelectorAll('script').forEach(old => {
     const s = document.createElement('script');
     Array.from(old.attributes).forEach(a => s.setAttribute(a.name, a.value));
     s.textContent = old.textContent;
     old.parentNode.replaceChild(s, old);
   });
 
-  setTimeout(() => {
-    bar.style.transform = 'translateY(0)';
-    bar.style.pointerEvents = 'auto';
-    document.body.style.paddingBottom = '66px';
-  }, 3000);
+  setTimeout(() => { bar.style.transform = 'translateY(0)'; bar.style.pointerEvents = 'auto'; document.body.style.paddingBottom = '66px'; }, 3000);
 }
 
-// ─── Between-Sections ad ─────────────────────────────────────────────────────
 function _injectBetweenSections(slots) {
+  // Try shared key 'between' first, fall back to ads.js alias 'between_sections'
   const key = _slotCode(slots, 'between') ? 'between' : 'between_sections';
   if (!_slotEnabled(slots, key)) return;
   const code = _slotCode(slots, key);
@@ -908,59 +1319,70 @@ function _injectBetweenSections(slots) {
   target.insertAdjacentElement('afterend', wrap);
 }
 
-// ─── Main insertSmartAds — called once on every public page ─────────────────
 function insertSmartAds() {
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  if (['privacy.html','terms.html','disclaimer.html','admin.html'].includes(currentPage)) return;
+  if (currentPage === 'admin.html') return;
   if (document.body?.dataset?.erSmartAds === '1') return;
   document.body.dataset.erSmartAds = '1';
 
-  const slots = getAdSlots();
+  const slots  = getAdSlots();
   const main   = document.querySelector('main');
   const footer = document.querySelector('footer');
   const hero   = document.querySelector('.page-hero, .hero');
+  const isPdfViewer = currentPage === 'pdf-viewer.html';
 
-  // 1. TOP BANNER — after hero, before content
-  // Use 'top' key; ads.js handles 'top_banner' independently
-  const topEl = _buildAdElement(slots, 'top', 'er-ad-shell er-ad-shell--top');
-  if (topEl) {
-    if (hero?.parentNode) hero.insertAdjacentElement('afterend', topEl);
-    else if (main) main.insertAdjacentElement('afterbegin', topEl);
+  if (isPdfViewer) {
+    _injectPdfViewerSlot(slots);
   }
 
-  // 2. INLINE MID — between content sections (use 'inline' key; ads.js handles inline_1/2/3)
-  const inlineEl = _buildAdElement(slots, 'inline', 'er-ad-shell er-ad-shell--inline');
-  if (inlineEl && main) {
-    const kids = Array.from(main.children).filter(el => !el.dataset.erAdSlot && !el.matches('script,style'));
-    const anchor = kids[Math.min(1, kids.length - 1)];
-    if (anchor) anchor.insertAdjacentElement('beforebegin', inlineEl);
+  // 1. TOP BANNER — 'top' key (ads.js handles 'top_banner' independently)
+  if (!isPdfViewer && !_hasManagedAdSlot('top', 'top_banner')) {
+    const topEl = _buildAdElement(slots, 'top', 'er-ad-shell er-ad-shell--top');
+    if (topEl) {
+      if (hero?.parentNode) hero.insertAdjacentElement('afterend', topEl);
+      else if (main) main.insertAdjacentElement('afterbegin', topEl);
+    }
   }
 
-  // 3. BETWEEN SECTIONS — injected after a delay to allow dynamic content
-  if (_slotEnabled(slots, 'between') || _slotEnabled(slots, 'between_sections')) {
-    setTimeout(() => _injectBetweenSections(slots), 200);
+  // 2. INLINE MID — 'inline' key (ads.js handles inline_1/2/3)
+  if (!_hasManagedAdSlot('inline', 'inline_1', 'inline_2', 'inline_3')) {
+    const inlineEl = _buildAdElement(slots, 'inline', 'er-ad-shell er-ad-shell--inline');
+    if (inlineEl && main) {
+      const kids = Array.from(main.children).filter(el => !el.dataset.erAdSlot && !el.matches('script,style'));
+      const anchor = kids[Math.min(1, kids.length - 1)];
+      if (anchor) anchor.insertAdjacentElement('beforebegin', inlineEl);
+    }
   }
 
-  // 4. PRE-FOOTER — above footer (use 'footer' key; ads.js handles 'pre_footer')
-  const footerEl = _buildAdElement(slots, 'footer', 'er-ad-shell er-ad-shell--footer');
-  if (footerEl && footer) footer.insertAdjacentElement('beforebegin', footerEl);
+  // 3. BETWEEN SECTIONS — deferred so dynamic content has rendered
+  setTimeout(() => _injectBetweenSections(slots), 200);
 
-  // 5. STICKY SIDEBAR — desktop only (deferred so page layout is settled)
+  // 4. PRE-FOOTER — 'footer' key (ads.js handles 'pre_footer')
+  if (!isPdfViewer && !_hasManagedAdSlot('footer', 'pre_footer')) {
+    const footerEl = _buildAdElement(slots, 'footer', 'er-ad-shell er-ad-shell--footer');
+    if (footerEl && footer) footer.insertAdjacentElement('beforebegin', footerEl);
+  }
+
+  // 5. STICKY SIDEBAR — desktop only
   setTimeout(() => _injectStickySidebar(slots), 500);
 
-  // 6. MOBILE STICKY BOTTOM — mobile only
+  // 6. MOBILE STICKY BOTTOM
   _injectMobileBottom(slots);
 }
 
 // Auto-apply on DOMContentLoaded for all non-admin pages
 if (typeof window !== 'undefined') {
   document.addEventListener('DOMContentLoaded', function() {
+    applySecurityHardening();
+    initSecurityHardeningObserver();
     if (!window.location.pathname.includes('admin')) {
+      syncSharedSiteChrome();
       applySiteConfig();
       initResponsiveNav();
       applyFooterBranding();
       addFooterLegalLinks();
       insertSmartAds();
+      applySecurityHardening();
     }
   });
 }

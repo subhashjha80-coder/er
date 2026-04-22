@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https: data: blob:; script-src 'self' 'unsafe-inline' https: data: blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' https: data: blob:; font-src 'self' https://fonts.gstatic.com data:; frame-src 'self' https: data: blob:; connect-src 'self' https: data: blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>PDF Preview - ExamReady</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
@@ -171,7 +173,7 @@
 <!-- Toolbar with title + actions -->
 <div class="pdf-toolbar" id="pdfToolbar" style="display:none">
   <div class="pdf-title-area">
-    <a class="pdf-back-btn" id="backBtn" href="javascript:history.back()">← Back</a>
+    <a class="pdf-back-btn" id="backBtn" href="#">← Back</a>
     <span class="pdf-doc-name" id="pdfDocName">PDF Preview</span>
   </div>
   <div class="pdf-actions">
@@ -186,7 +188,7 @@
     <div class="loading-spinner"></div>
     <div class="loading-text">Loading PDF…</div>
   </div>
-  <iframe id="pdfFrame" title="PDF Preview" allowfullscreen></iframe>
+  <iframe id="pdfFrame" title="PDF Preview" allowfullscreen referrerpolicy="strict-origin-when-cross-origin" loading="lazy"></iframe>
 </div>
 
 <!-- Note bar -->
@@ -208,6 +210,7 @@
 
 <script src="shared.js"></script>
 <script src="animations.js"></script>
+<script src="ads.js"></script>
 <script>
 /* ── Helpers ── */
 function getQueryParam(key) {
@@ -230,10 +233,13 @@ function resizeViewer() {
   const header  = document.querySelector('header');
   const toolbar = document.getElementById('pdfToolbar');
   const noteBar = document.getElementById('pdfNoteBar');
+  const adHeight = Array.from(document.querySelectorAll('.er-pdf-ad-slot'))
+    .filter(el => el.offsetParent !== null)
+    .reduce((sum, el) => sum + el.offsetHeight, 0);
   const headerH  = header  ? header.offsetHeight  : 64;
   const toolbarH = toolbar ? toolbar.offsetHeight  : 56;
   const noteH    = noteBar && noteBar.style.display !== 'none' ? noteBar.offsetHeight : 0;
-  viewerArea.style.height = `calc(100vh - ${headerH + toolbarH + noteH}px)`;
+  viewerArea.style.height = `calc(100vh - ${headerH + toolbarH + noteH + adHeight}px)`;
 }
 
 window.addEventListener('resize', resizeViewer);
@@ -254,6 +260,7 @@ function renderViewer() {
 
   /* Update toolbar */
   document.getElementById('pdfDocName').textContent      = title;
+  document.getElementById('backBtn').onclick             = e => { e.preventDefault(); history.back(); };
   document.getElementById('openOriginalBtn').href        = resolved;
   document.getElementById('downloadBtn').href            = resolved;
   document.getElementById('openOriginalLink').href       = resolved;

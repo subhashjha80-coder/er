@@ -36,6 +36,7 @@ var AD_SLOT_GROUPS = [
       { key:'results_banner', label:'Results Banner (ads.js)',     where:'After quiz result card',             pages:'quiz.html, solution-post.html', size:'Responsive',              system:'ads.js',    priority:'veryhigh', tip:'Same high-intent placement for ads.js. Use the same code.' },
       { key:'solution_mid',   label:'Mid-Article (ads.js)',        where:'Halfway through solution article',   pages:'solution-post.html',            size:'In-article / Native',     system:'ads.js',    priority:'high',     tip:'Inserted mid-read when engagement is highest.' },
       { key:'quiz_sidebar',   label:'Quiz Sidebar (ads.js)',       where:'Inside quiz page side panel',        pages:'quiz.html',                     size:'160×600 or Responsive',   system:'ads.js',    priority:'high',     tip:'Shown while a student is actively taking a quiz.' },
+      { key:'pdf_viewer',     label:'PDF Viewer Banner',           where:'Between the PDF toolbar and viewer', pages:'pdf-viewer.html',               size:'Responsive',              system:'shared.js', priority:'high',     tip:'Dedicated monetisation slot for PDF previews without breaking the viewer layout.' },
     ]
   },
   {
@@ -56,23 +57,47 @@ var ALL_AD_SLOTS = (function() {
   return all;
 })();
 
+var AD_SLOT_LINKS = [
+  ['top', 'top_banner'],
+  ['footer', 'pre_footer'],
+  ['between', 'between_sections'],
+  ['sticky', 'sidebar_sticky']
+];
+
+function normalizeAdSlots(input) {
+  var raw = (input && typeof input === 'object' && !Array.isArray(input)) ? input : {};
+  var out = {};
+  ALL_AD_SLOTS.forEach(function(s) {
+    out[s.key] = Object.assign({ enabled: true, adCode: '' }, raw[s.key] || {});
+  });
+  Object.keys(raw).forEach(function(k) {
+    if (!out[k]) out[k] = Object.assign({ enabled: true, adCode: '' }, raw[k]);
+  });
+  AD_SLOT_LINKS.forEach(function(pair) {
+    var primary = out[pair[0]] || { enabled: true, adCode: '' };
+    var alias = out[pair[1]] || { enabled: true, adCode: '' };
+    var primaryCode = (primary.adCode || '').trim();
+    var aliasCode = (alias.adCode || '').trim();
+    var source = primaryCode ? primary : aliasCode ? alias : (primary.enabled === false && alias.enabled !== false ? alias : primary);
+    var synced = {
+      enabled: source.enabled !== false,
+      adCode: source.adCode || ''
+    };
+    out[pair[0]] = Object.assign({}, out[pair[0]] || {}, synced);
+    out[pair[1]] = Object.assign({}, out[pair[1]] || {}, synced);
+  });
+  return out;
+}
+
 function loadAdSlots() {
   try {
     var saved = JSON.parse(localStorage.getItem('er_ad_slots') || '{}');
-    var out = {};
-    ALL_AD_SLOTS.forEach(function(s) {
-      out[s.key] = Object.assign({ enabled: true, adCode: '' }, saved[s.key] || {});
-    });
-    // Preserve any extra keys admin may have added
-    Object.keys(saved).forEach(function(k) {
-      if (!out[k]) out[k] = Object.assign({ enabled: true, adCode: '' }, saved[k]);
-    });
-    return out;
-  } catch(e) { return {}; }
+    return normalizeAdSlots(saved);
+  } catch(e) { return normalizeAdSlots({}); }
 }
 
 function persistAdSlots(slots) {
-  localStorage.setItem('er_ad_slots', JSON.stringify(slots));
+  localStorage.setItem('er_ad_slots', JSON.stringify(normalizeAdSlots(slots)));
 }
 
 function renderAdManager() {
@@ -96,8 +121,8 @@ function renderAdManager() {
           '<span style="color:#aaa"> have real ad code</span>' +
         '</span>' +
         (codedCount === 0
-          ? '<span style="font-size:11px;font-weight:800;color:#ffdd88;background:rgba(255,200,0,.12);padding:4px 12px;border-radius:20px;border:1px solid rgba(255,200,0,.25)">⚠ Showing native placeholders — paste AdSense code to go live</span>'
-          : '<span style="font-size:11px;font-weight:800;color:#7fff9a;background:rgba(100,255,100,.1);padding:4px 12px;border-radius:20px;border:1px solid rgba(100,255,100,.2)">✅ Real ads active on ' + codedCount + ' slot' + (codedCount !== 1 ? 's' : '') + '</span>') +
+          ? '<span style="font-size:11px;font-weight:800;color:#ffdd88;background:rgba(255,200,0,.12);padding:4px 12px;border-radius:20px;border:1px solid rgba(255,200,0,.25)">⚠ No AdSense code live yet - empty slots stay hidden</span>'
+          : '<span style="font-size:11px;font-weight:800;color:#7fff9a;background:rgba(100,255,100,.1);padding:4px 12px;border-radius:20px;border:1px solid rgba(100,255,100,.2)">✅ Live AdSense code active on ' + codedCount + ' slot' + (codedCount !== 1 ? 's' : '') + '</span>') +
       '</div>';
   }
 
@@ -168,7 +193,7 @@ function buildAdSlotCard(s, cfg) {
     '<div style="margin-bottom:10px">' +
       '<label style="display:flex;align-items:center;justify-content:space-between;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:5px">' +
         '<span>Ad Code</span>' +
-        '<span style="color:' + (hasCode ? 'var(--green)' : 'var(--muted)') + '">' + (hasCode ? '✓ ' + adCode.trim().length + ' chars — live code set' : 'Empty — showing native placeholder') + '</span>' +
+        '<span style="color:' + (hasCode ? 'var(--green)' : 'var(--muted)') + '">' + (hasCode ? '✓ ' + adCode.trim().length + ' chars — live AdSense code set' : 'Empty - slot stays hidden') + '</span>' +
       '</label>' +
       '<textarea id="' + codeId + '" rows="3" ' +
         'style="font-family:monospace;font-size:11.5px;background:#fafafa;border:2px solid ' + (hasCode ? 'var(--green)' : 'var(--gray2)') + ';border-radius:8px;width:100%;padding:10px;resize:vertical;outline:none;transition:border-color .2s" ' +
@@ -222,12 +247,13 @@ window.adMgr = {
   },
 
   clearSlot: function(key) {
-    if (!confirm('Clear ad code for "' + key + '"?\nSlot will show a styled native placeholder.')) return;
+    if (!confirm('Clear ad code for "' + key + '"?\nThis placement will stay hidden until new AdSense code is saved.')) return;
     var slots = loadAdSlots();
     if (slots[key]) { slots[key].adCode = ''; slots[key].enabled = true; }
     persistAdSlots(slots);
     showToast('Slot cleared.', 'warn');
     renderAdManager();
+    renderDashboard();
   },
 
   enableAll: function() {
@@ -236,6 +262,7 @@ window.adMgr = {
     persistAdSlots(slots);
     showToast('All slots enabled.');
     renderAdManager();
+    renderDashboard();
   },
 
   disableAll: function() {
@@ -245,15 +272,17 @@ window.adMgr = {
     persistAdSlots(slots);
     showToast('All slots disabled.', 'warn');
     renderAdManager();
+    renderDashboard();
   },
 
   clearAll: function() {
-    if (!confirm('Clear ALL ad code from every slot?\nAll slots will revert to native placeholders.')) return;
+    if (!confirm('Clear ALL ad code from every slot?\nAll placements without code will stay hidden.')) return;
     var slots = loadAdSlots();
     ALL_AD_SLOTS.forEach(function(s) { if (slots[s.key]) slots[s.key].adCode = ''; });
     persistAdSlots(slots);
     showToast('All ad code cleared.', 'warn');
     renderAdManager();
+    renderDashboard();
   },
 
   exportConfig: function() {
@@ -279,6 +308,7 @@ window.adMgr = {
         persistAdSlots(data);
         showToast('Ad config imported!');
         renderAdManager();
+        renderDashboard();
       } catch(err) { showToast('Could not parse JSON.', 'error'); }
     };
     reader.readAsText(f);

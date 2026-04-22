@@ -9,6 +9,7 @@
 .er-ad-wrap--between    { max-width: 1200px; margin: 0 auto 20px; padding: 0 24px; }
 .er-ad-wrap--pre-footer { max-width: 1200px; margin: 0 auto 16px; padding: 0 24px; }
 .er-ad-wrap--results    { max-width: 1200px; margin: 20px auto; padding: 0 24px; }
+.er-ad-wrap--pdf-viewer { max-width: 1200px; margin: 12px auto; padding: 0 18px; flex-shrink: 0; }
 .er-ad-wrap--solution-mid { margin: 18px 0; }
 .er-ad-wrap--quiz-side  { margin-top: 16px; }
 
@@ -207,7 +208,8 @@ body.er-has-mba { padding-bottom: 66px !important; }
   .er-ad-wrap--inline,
   .er-ad-wrap--between,
   .er-ad-wrap--pre-footer,
-  .er-ad-wrap--results { padding: 0 16px; }
+  .er-ad-wrap--results,
+  .er-ad-wrap--pdf-viewer { padding: 0 16px; }
   .er-ad-strip-grid { grid-template-columns: 1fr 1fr; }
   .er-ad-strip-grid .er-ad-strip-card:last-child { display: none; }
   .er-ad-inline { flex-wrap: wrap; }
